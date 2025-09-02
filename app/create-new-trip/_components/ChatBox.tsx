@@ -8,8 +8,11 @@ import EmptyBoxState from "./EmptyBoxState";
 import GroupSizeUi from "./GroupSizeUi";
 import BudgetUi from "./BudgetUi";
 import TripDuration from "./TripDurationUi";
+import TravelInterestsUi from "./TravelInterestsUi";
+import FinalUi from "./FinalUi";
 
 type Message = {
+  id: string;
   role: string;
   content: string;
   ui?: string;
@@ -27,6 +30,7 @@ function ChatBox() {
     setLoading(true);
     setUserInput("");
     const newMsg: Message = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       role: "user",
       content: userInput,
     };
@@ -40,6 +44,7 @@ function ChatBox() {
     setMessages((prev: Message[]) => [
       ...prev,
       {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
         role: "assistant",
         content: result?.data?.resp,
         ui: result?.data?.ui,
@@ -49,22 +54,63 @@ function ChatBox() {
     setLoading(false);
   };
 
-  const RenderGenerativeUi=(ui:string)=>{
-    if(ui==='budget'){
-      //Budget UI;
-      <BudgetUi onSelectedOption={(v:string) => {setUserInput(v); onSend()}}/>
-    } else if(ui==='groupSize'){
-      //Group Size UI;
-      <GroupSizeUi onSelectedOption={(v:string) => {setUserInput(v); onSend()}}/>
-    } else if(ui=='tripDuration'){
-      // Trip Duration UI;
-      <TripDuration onSelectedOption={(v:string) => {setUserInput(v); onSend()}}/>
-    }
-    else if(ui=='final'){
-      // Final UI;
-    }
+  const RenderGenerativeUi = (ui: string, id?: string): React.ReactNode => {
+    if (ui === "budget") {
+      return (
+        <BudgetUi
+          key={`gen-${id ?? ui}`}
+          onSelectedOption={(v: string) => {
+            setUserInput(v);
+            onSend();
+          }}
+        />
+      );
+    } else if (ui === "groupSize") {
+      return (
+        <GroupSizeUi
+          key={`gen-${id ?? ui}`}
+          onSelectedOption={(v: string) => {
+            setUserInput(v);
+            onSend();
+          }}
+        />
+      );
+    } else if (ui === "tripDuration") {
+      return (
+        <TripDuration
+          key={`gen-${id ?? ui}`}
+          onSelectedOption={(v: string) => {
+            setUserInput(v);
+            onSend();
+          }}
+        />
+      );
+    } else if (ui === "interests") {
+      return (
+        <TravelInterestsUi
+          key={`gen-${id ?? ui}`}
+          onSelectedOption={(v: string) => {
+            setUserInput(v);
+            onSend();
+          }}
+        />
+      );
+    } else if (ui === "final") {
+      return (
+        <FinalUi
+          key={`gen-${id ?? ui}`}
+          title={`Planning your dream trip...`}
+          subtitle={`Gathering best destinations, activities, and travel details for you.`}
+          onSelectedOption={(v: string) => {
+            // if user clicks view, send a 'view' message to advance
+            setUserInput(v);
+            onSend();
+          }}
+        />
+      );
+    } 
     return null;
-  }
+  };
 
   return (
     <div className="h-[87vh] flex flex-col">
@@ -81,7 +127,7 @@ function ChatBox() {
               </div>
             </div>
           ) : (
-            <div className="flex justify-start mt-2">
+            <div className="flex justify-start mt-2" key={index}>
               <div className="max-w-lg bg-gray-100 text-black px-4 py-2 rounded-lg">
                 {msg.content}
                 {RenderGenerativeUi(msg.ui??"")}
