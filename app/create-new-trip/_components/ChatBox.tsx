@@ -95,7 +95,10 @@ function ChatBox() {
           }}
         />
       );
-    } else if (ui === "final") {
+    // } else if (ui === "final") {
+    } else if (ui === "source" || ui === "destination") {
+      return null;
+    } else {
       return (
         <FinalUi
           key={`gen-${id ?? ui}`}
@@ -151,6 +154,12 @@ function ChatBox() {
             placeholder="Start Typing Here ..."
             className="w-full h-28 bg-transparent border-none focus-visible:ring-0 shadow-none"
             onChange={(event) => setUserInput(event.target.value)}
+            onKeyDown={(event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                onSend();
+              }
+            }}
             value={userInput}
           />
           <Button

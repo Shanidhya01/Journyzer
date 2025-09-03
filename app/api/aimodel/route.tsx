@@ -57,13 +57,75 @@ export async function POST(req: NextRequest) {
     });
 
     const message = completion.choices[0].message;
-    let parsed;
+
+    // helper to normalize ui tokens to the expected client tokens
+    const normalizeUi = (raw: any) => {
+      if (!raw && raw !== 0) return "final";
+      const s = String(raw).toLowerCase();
+      if (s.includes("group")) return "groupSize";
+      if (s.includes("budget")) return "budget";
+      if (s.includes("trip") && s.includes("duration")) return "tripDuration";
+      if (s.includes("interest") || s.includes("interests")) return "interests";
+      if (s.includes("final") || s.includes("done") || s.includes("complete")) return "final";
+      // fallback: return lowercased token if matches expected words
+      if (s === "groupsize") return "groupSize";
+      if (s === "tripduration") return "tripDuration";
+      return String(raw);
+    };
+
+    let parsed: any = { resp: String(message.content ?? ""), ui: "final" };
 
     try {
-      parsed = JSON.parse(message.content ?? "{}");
-    } catch {
-      parsed = { resp: message.content, ui: "Final" };
+      if (typeof message.content === "object") {
+        parsed = { ...(message.content as object) } as any;
+      } else {
+        parsed = JSON.parse(String(message.content ?? "{}"));
+      }
+    } catch (err) {
+      // try to extract a JSON-like substring if possible
+      try {
+        const text = String(message.content ?? "");
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsed = JSON.parse(jsonMatch[0]);
+        } else {
+          parsed = { resp: text, ui: "final" };
+        }
+      } catch (e) {
+        parsed = { resp: String(message.content ?? ""), ui: "final" };
+      }
     }
+
+    // normalize fields
+    parsed.resp = parsed.resp ?? String(message.content ?? "");
+    parsed.ui = normalizeUi(parsed.ui);
+
+    // If model-provided ui contradicts the natural language resp, infer from resp
+    const inferUiFromText = (text: string) => {
+      if (!text) return null;
+      const s = text.toLowerCase();
+      // budget detection: explicit words
+      if (s.includes("budget") || s.includes("low") || s.includes("medium") || s.includes("high")) return "budget";
+      // group size detection
+      if (s.includes("group size") || s.includes("group") || s.includes("just me") || s.includes("couple") || s.includes("family") || s.includes("friends")) return "groupSize";
+      // trip duration
+      if (s.includes("duration") || s.includes("days") || s.match(/\b\d+\s+days?\b/)) return "tripDuration";
+      // interests
+      if (s.includes("interest") || s.includes("adventure") || s.includes("sightseeing") || s.includes("food") || s.includes("nightlife") || s.includes("relax")) return "interests";
+      // final / view
+      if (s.includes("view trip") || s.includes("planning your") || s.includes("final") || s.includes("prepare") || s.includes("itinerary")) return "final";
+      return null;
+    };
+
+    const inferred = inferUiFromText(String(parsed.resp ?? ""));
+    if (inferred && inferred !== parsed.ui) {
+      console.log("[aimodel] overriding ui from", parsed.ui, "to", inferred, "based on resp text");
+      parsed.ui = inferred;
+    }
+
+    // debug log to help diagnose mismatches
+    console.log("[aimodel] raw message.content:", message.content);
+    console.log("[aimodel] parsed:", parsed);
 
     return NextResponse.json(parsed);
 
