@@ -1,27 +1,25 @@
 {
-  "name": "itinerary-backend",
+  "name": "backend",
   "version": "1.0.0",
-  "description": "AI-Powered Itinerary Generator backend",
-  "main": "src/index.js",
+  "description": "",
+  "main": "server.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon src/server.js"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "axios": "^1.5.0",
-    "bcryptjs": "^2.4.3",
+    "axios": "^1.13.2",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "dotenv": "^16.1.4",
-    "express": "^4.18.2",
-    "groq-sdk": "^0.35.0",
-    "jsonwebtoken": "^9.0.0",
-    "mongoose": "^7.5.0",
-    "morgan": "^1.10.0",
-    "openai": "^4.2.1",
-    "puppeteer": "^21.3.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "firebase-admin": "^13.6.0",
+    "mongoose": "^9.1.4",
+    "nodemon": "^3.1.11",
+    "openai": "^6.16.0"
   }
 }
