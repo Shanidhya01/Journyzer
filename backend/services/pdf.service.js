@@ -16,11 +16,33 @@ exports.createPDF = async (trip, res) => {
   doc.fontSize(22).text(`Trip to ${destination}`, { align: "center" });
   doc.moveDown(1.5);
 
-  const buildMapsUrl = (query) =>
-    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  const buildDirectionsUrl = (destinationQuery) =>
+    `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destinationQuery)}`;
 
-  const writeMapsLink = (label, query) => {
-    const url = buildMapsUrl(query);
+  const extractPlaceName = (text) => {
+    let t = String(text ?? "").trim();
+
+    // Remove leading numbering like "1." and time-of-day prefixes.
+    t = t.replace(/^\s*\d+\s*\.\s*/, "");
+    t = t.replace(/^(Morning|Afternoon|Evening)\s*:\s*/i, "");
+
+    // Prefer the title before ':' (common in your itinerary format).
+    const colonIndex = t.indexOf(":");
+    if (colonIndex > 0) {
+      t = t.slice(0, colonIndex).trim();
+    }
+
+    // Remove common leading verbs.
+    t = t.replace(/^(Visit|Explore|Evening at|Shopping at|Relax and enjoy)\s+/i, "");
+
+    // Strip trailing punctuation.
+    t = t.replace(/[.,;:\-–]+\s*$/, "").trim();
+
+    return t.length >= 3 ? t : String(text ?? "").trim();
+  };
+
+  const writeMapsLink = (label, destinationQuery) => {
+    const url = buildDirectionsUrl(destinationQuery);
     doc
       .fontSize(10)
       .fillColor("#2563eb")
@@ -61,8 +83,12 @@ exports.createPDF = async (trip, res) => {
     } else {
       items.forEach((text, i) => {
         doc.fontSize(12).fillColor("black").text(`${i + 1}. ${text}`);
-        const query = `${destination} ${text}`;
-        writeMapsLink("View on Google Maps", query);
+        const placeName = extractPlaceName(text);
+        const destinationQuery =
+          placeName.toLowerCase().includes(String(destination).toLowerCase())
+            ? placeName
+            : `${placeName}, ${destination}`;
+        writeMapsLink("Get Directions (Google Maps)", destinationQuery);
         doc.moveDown(0.2);
       });
     }
