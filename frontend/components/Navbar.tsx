@@ -129,7 +129,7 @@ export default function Navbar() {
                       </div>
                       <div className="p-2">
                         <Link
-                          href="/profile"
+                          href="/Profile"
                           className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-all font-medium group"
                           onClick={() => setShowUserMenu(false)}
                         >
@@ -137,7 +137,7 @@ export default function Navbar() {
                           My Profile
                         </Link>
                         <Link
-                          href="/settings"
+                          href="/setting"
                           className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-xl transition-all font-medium group"
                           onClick={() => setShowUserMenu(false)}
                         >
@@ -263,7 +263,7 @@ export default function Navbar() {
                 <div className="h-px bg-gray-200 my-2"></div>
 
                 <Link 
-                  href="/profile" 
+                  href="/Profile" 
                   className="group flex items-center gap-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all font-semibold py-3.5 px-4 rounded-xl"
                   onClick={() => setIsOpen(false)}
                 >
@@ -271,7 +271,7 @@ export default function Navbar() {
                   My Profile
                 </Link>
                 <Link 
-                  href="/settings" 
+                  href="/setting" 
                   className="group flex items-center gap-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-all font-semibold py-3.5 px-4 rounded-xl"
                   onClick={() => setIsOpen(false)}
                 >

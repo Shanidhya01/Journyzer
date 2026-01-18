@@ -59,7 +59,7 @@ type Trip = {
 };
 
 function isActivitiesItinerary(
-  itinerary: unknown
+  itinerary: unknown,
 ): itinerary is ItineraryDayActivities[] {
   return (
     Array.isArray(itinerary) &&
@@ -69,13 +69,13 @@ function isActivitiesItinerary(
         typeof d === "object" &&
         "day" in d &&
         "activities" in d &&
-        Array.isArray((d as any).activities)
+        Array.isArray((d as any).activities),
     )
   );
 }
 
 function isSlotsItinerary(
-  itinerary: unknown
+  itinerary: unknown,
 ): itinerary is ItineraryDaySlots[] {
   return (
     Array.isArray(itinerary) &&
@@ -86,9 +86,26 @@ function isSlotsItinerary(
         "day" in d &&
         "morning" in d &&
         "afternoon" in d &&
-        "evening" in d
+        "evening" in d,
     )
   );
+}
+
+function toSlotsFromActivities(activities: string[]) {
+  const list = Array.isArray(activities)
+    ? activities.map((a) => String(a ?? "").trim()).filter(Boolean)
+    : [];
+
+  if (list.length === 0) return { morning: "", afternoon: "", evening: "" };
+  if (list.length === 1) return { morning: list[0], afternoon: list[0], evening: list[0] };
+  if (list.length === 2) return { morning: list[0], afternoon: list[1], evening: list[1] };
+  if (list.length === 3) return { morning: list[0], afternoon: list[1], evening: list[2] };
+
+  const third = Math.ceil(list.length / 3);
+  const morning = list.slice(0, third).join("; ");
+  const afternoon = list.slice(third, third * 2).join("; ") || list[third] || "";
+  const evening = list.slice(third * 2).join("; ") || list[list.length - 1] || "";
+  return { morning, afternoon, evening };
 }
 
 // Enhanced ItineraryCard component with improved styling
@@ -155,13 +172,19 @@ export default function TripDetailsPage() {
 
   const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editingDay, setEditingDay] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState({
+    morning: "",
+    afternoon: "",
+    evening: "",
+  });
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string>("");
   const [selectedDay, setSelectedDay] = useState<number>(1);
 
   const locations = useMemo(
     () => (trip?.locations ?? []) as Location[],
-    [trip]
+    [trip],
   );
 
   const locationsByDay = useMemo(() => {
@@ -175,13 +198,25 @@ export default function TripDetailsPage() {
     return map;
   }, [locations]);
 
+  const slotsItinerary = useMemo(() => {
+    if (!trip?.itinerary) return null;
+    if (isSlotsItinerary(trip.itinerary)) return trip.itinerary;
+    if (isActivitiesItinerary(trip.itinerary)) {
+      return trip.itinerary.map((d) => ({
+        day: d.day,
+        ...toSlotsFromActivities(d.activities),
+      }));
+    }
+    return null;
+  }, [trip?.itinerary]);
+
   const derivedDays = useMemo(() => {
     const fromTrip =
       typeof trip?.days === "number" && trip.days > 0 ? trip.days : 0;
     const fromLocations =
       locations.length > 0
         ? Math.max(
-            ...locations.map((l) => (typeof l.day === "number" ? l.day : 1))
+            ...locations.map((l) => (typeof l.day === "number" ? l.day : 1)),
           )
         : 0;
     const fromItinerary = Array.isArray(trip?.itinerary)
@@ -192,12 +227,12 @@ export default function TripDetailsPage() {
 
   const dayNumbers = useMemo(
     () => Array.from({ length: derivedDays }, (_, i) => i + 1),
-    [derivedDays]
+    [derivedDays],
   );
 
   const selectedDayLocations = useMemo(
     () => locationsByDay[selectedDay] ?? [],
-    [locationsByDay, selectedDay]
+    [locationsByDay, selectedDay],
   );
 
   useEffect(() => {
@@ -210,7 +245,7 @@ export default function TripDetailsPage() {
     const destination = `${loc.lat},${loc.lng}`;
     // Leaving origin unspecified lets Google Maps use current location / prompt user
     return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-      destination
+      destination,
     )}&travelmode=driving`;
   };
 
@@ -286,6 +321,27 @@ export default function TripDetailsPage() {
     }
   };
 
+  const saveDayEdits = async (day: number) => {
+    if (!trip) return;
+
+    const res = await api.put(`/trips/${trip._id}/itinerary/${day}`, editForm);
+
+    setTrip(res.data);
+    setEditingDay(null);
+  };
+
+  const regenerateDay = async (day: number) => {
+    if (!trip) return;
+
+    const res = await api.post("/itinerary/regenerate-day", {
+      tripId: trip._id,
+      day,
+    });
+
+    setTrip(res.data);
+  };
+
+
   const downloadPDF = async () => {
     if (!trip || !trip.itinerary) return;
 
@@ -298,7 +354,7 @@ export default function TripDetailsPage() {
       },
       {
         responseType: "blob",
-      }
+      },
     );
 
     const blob = new Blob([response.data], {
@@ -477,7 +533,8 @@ export default function TripDetailsPage() {
                           onClick={downloadPDF}
                           className="bg-white text-indigo-700 border-2 border-indigo-500 px-8 py-3 rounded-2xl font-bold hover:bg-indigo-50 transition-all inline-flex items-center justify-center gap-3"
                         >
-                          <Download className="w-5 h-5" /> Export Itinerary as PDF
+                          <Download className="w-5 h-5" /> Export Itinerary as
+                          PDF
                         </button>
                       )}
 
@@ -508,63 +565,92 @@ export default function TripDetailsPage() {
                   </div>
 
                   <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl p-8 border border-white/20">
-                    {isSlotsItinerary(trip.itinerary) ? (
-                      <EnhancedItineraryCard itinerary={trip.itinerary} />
-                    ) : isActivitiesItinerary(trip.itinerary) ? (
+                    {!!slotsItinerary && (
                       <div className="space-y-6">
-                        {trip.itinerary.map((day) => (
+                        {slotsItinerary.map((day) => (
                           <div
                             key={day.day}
-                            className="border-2 border-indigo-100 rounded-2xl overflow-hidden bg-linear-to-br from-white to-indigo-50/30"
+                            className="border rounded-2xl p-6 bg-white"
                           >
-                            <div className="bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 px-6 py-4">
-                              <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                                <Calendar className="w-5 h-5" />
-                                Day {day.day}
-                                {day.title && (
-                                  <span className="text-white/80">
-                                    • {day.title}
-                                  </span>
-                                )}
-                              </h3>
-                            </div>
-                            <div className="p-6">
-                              <ul className="space-y-3">
-                                {day.activities.map((activity, idx) => (
-                                  <li key={idx} className="flex gap-3">
-                                    <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-0.5">
-                                      <span className="text-xs font-bold text-indigo-600">
-                                        {idx + 1}
-                                      </span>
-                                    </div>
-                                    <span className="text-gray-800 leading-relaxed">
-                                      {activity}
-                                    </span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
+                            <h3 className="font-bold text-lg mb-4">
+                              Day {day.day}
+                            </h3>
+
+                            {editingDay === day.day ? (
+                              <>
+                                <input
+                                  className="w-full border p-2 mb-2 rounded"
+                                  value={editForm.morning}
+                                  onChange={(e) =>
+                                    setEditForm({
+                                      ...editForm,
+                                      morning: e.target.value,
+                                    })
+                                  }
+                                  placeholder="Morning"
+                                />
+                                <input
+                                  className="w-full border p-2 mb-2 rounded"
+                                  value={editForm.afternoon}
+                                  onChange={(e) =>
+                                    setEditForm({
+                                      ...editForm,
+                                      afternoon: e.target.value,
+                                    })
+                                  }
+                                  placeholder="Afternoon"
+                                />
+                                <input
+                                  className="w-full border p-2 mb-4 rounded"
+                                  value={editForm.evening}
+                                  onChange={(e) =>
+                                    setEditForm({
+                                      ...editForm,
+                                      evening: e.target.value,
+                                    })
+                                  }
+                                  placeholder="Evening"
+                                />
+
+                                <button
+                                  onClick={() => saveDayEdits(day.day)}
+                                  className="bg-indigo-600 text-white px-4 py-2 rounded"
+                                >
+                                  Save
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <p>
+                                  <b>Morning:</b> {day.morning}
+                                </p>
+                                <p>
+                                  <b>Afternoon:</b> {day.afternoon}
+                                </p>
+                                <p>
+                                  <b>Evening:</b> {day.evening}
+                                </p>
+
+                                <button
+                                  onClick={() => {
+                                    setEditingDay(day.day);
+                                    setEditForm(day);
+                                  }}
+                                  className="mt-3 text-indigo-600 font-semibold"
+                                >
+                                  Edit Day
+                                </button>
+
+                                <button
+                                  onClick={() => regenerateDay(day.day)}
+                                  className="ml-4 text-sm text-pink-600 font-bold"
+                                >
+                                  Regenerate Day
+                                </button>
+                              </>
+                            )}
                           </div>
                         ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12">
-                        <div className="w-20 h-20 bg-linear-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                          <Sparkles className="w-10 h-10 text-indigo-600" />
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
-                          No Itinerary Yet
-                        </h3>
-                        <p className="text-gray-600 mb-1">
-                          Ready to start your adventure?
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Click{" "}
-                          <span className="font-semibold text-indigo-600">
-                            Generate Itinerary
-                          </span>{" "}
-                          to create your personalized plan
-                        </p>
                       </div>
                     )}
                   </div>
@@ -621,7 +707,7 @@ export default function TripDetailsPage() {
                                 window.open(
                                   url,
                                   "_blank",
-                                  "noopener,noreferrer"
+                                  "noopener,noreferrer",
                                 );
                             }}
                             className="text-sm font-bold text-indigo-700 hover:text-indigo-800"
