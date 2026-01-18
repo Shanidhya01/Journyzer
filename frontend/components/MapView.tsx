@@ -28,8 +28,22 @@ const defaultMapOptions = {
 };
 
 export default function MapView({ locations, onLocationClick, height = 500, zoom = 12 }: Props) {
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
+
+  if (!googleMapsApiKey) {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-8 text-center">
+        <MapPin className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-yellow-900 mb-2">Map API key missing</h3>
+        <p className="text-yellow-800">
+          Set <span className="font-mono">NEXT_PUBLIC_GOOGLE_MAPS_KEY</span> in your frontend .env and restart the dev server.
+        </p>
+      </div>
+    );
+  }
+
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!,
+    googleMapsApiKey,
   });
 
   if (loadError) {

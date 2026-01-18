@@ -175,7 +175,7 @@ export default function CreateItinerary() {
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
                 placeholder="e.g., Paris, Tokyo, New York, Bali..."
-                className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-lg placeholder:text-gray-400 bg-white/50"
+                className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl text-gray-800 focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-lg placeholder:text-gray-400 bg-white/50"
               />
             </div>
 

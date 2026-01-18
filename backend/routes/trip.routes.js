@@ -59,4 +59,11 @@ router.delete("/:id", auth, async (req, res, next) => {
   }
 });
 
+/**
+ * @route   PUT /api/trips/:tripId/itinerary/:day
+ * @desc    Update a single itinerary day (manual edits)
+ * @access  Protected
+ */
+router.put("/:tripId/itinerary/:day", auth, controller.updateItineraryDay);
+
 module.exports = router;

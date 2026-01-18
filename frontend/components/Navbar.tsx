@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
 import { 
@@ -42,15 +42,9 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav 
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? "bg-white/95 backdrop-blur-xl shadow-lg border-b border-gray-200/50" 
-          : "bg-white/90 backdrop-blur-md border-b border-gray-200/30"
-      }`}
-    >
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 backdrop-blur-lg bg-white/95">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative">
@@ -65,45 +59,30 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-6">
             {user ? (
               <>
                 <Link 
                   href="/dashboard" 
-                  className="group flex items-center gap-2 text-gray-700 hover:text-indigo-600 transition-all font-semibold px-4 py-2.5 rounded-xl hover:bg-indigo-50"
+                  className="flex items-center gap-2 text-gray-700 hover:text-indigo-600 transition-colors font-medium"
                 >
-                  <LayoutDashboard className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  <LayoutDashboard className="w-4 h-4" />
                   Dashboard
                 </Link>
                 <Link 
-                  href="/explore" 
-                  className="group flex items-center gap-2 text-gray-700 hover:text-purple-600 transition-all font-semibold px-4 py-2.5 rounded-xl hover:bg-purple-50"
-                >
-                  <Compass className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
-                  Explore
-                </Link>
-                <Link 
                   href="/trips" 
-                  className="group flex items-center gap-2 text-gray-700 hover:text-pink-600 transition-all font-semibold px-4 py-2.5 rounded-xl hover:bg-pink-50"
+                  className="flex items-center gap-2 text-gray-700 hover:text-indigo-600 transition-colors font-medium"
                 >
-                  <MapPin className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  <MapPin className="w-4 h-4" />
                   My Trips
                 </Link>
-
-                {/* Divider */}
-                <div className="w-px h-8 bg-gray-200 mx-2"></div>
-
-                {/* Notifications */}
-                <button className="relative p-2.5 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all group">
-                  <Bell className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                </button>
-
-                {/* User Menu */}
-                <div className="relative">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
                   <button 
-                    onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 transition-all group"
+                    onClick={() => auth.signOut()}
+                    className="flex items-center gap-2 text-gray-700 hover:text-red-600 transition-colors font-medium"
                   >
                     <div className="relative">
                       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full blur opacity-50"></div>
@@ -193,7 +172,7 @@ export default function Navbar() {
 
                 <Link 
                   href="/login" 
-                  className="text-gray-700 hover:text-indigo-600 transition-all font-semibold px-5 py-2.5 rounded-xl hover:bg-gray-50"
+                  className="text-gray-700 hover:text-indigo-600 transition-colors font-medium"
                 >
                   Login
                 </Link>
@@ -214,7 +193,7 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <button 
             onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden p-3 text-gray-700 hover:bg-gray-100 rounded-xl transition-all"
+            className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -222,7 +201,7 @@ export default function Navbar() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="lg:hidden py-6 border-t border-gray-200/50 animate-fadeIn">
+          <div className="md:hidden py-4 border-t border-gray-200">
             {user ? (
               <div className="flex flex-col gap-2">
                 {/* User Info Card */}
@@ -244,26 +223,18 @@ export default function Navbar() {
 
                 <Link 
                   href="/dashboard" 
-                  className="group flex items-center gap-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all font-semibold py-3.5 px-4 rounded-xl"
+                  className="flex items-center gap-2 text-gray-700 hover:text-indigo-600 transition-colors font-medium py-2"
                   onClick={() => setIsOpen(false)}
                 >
-                  <LayoutDashboard className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  <LayoutDashboard className="w-4 h-4" />
                   Dashboard
                 </Link>
                 <Link 
-                  href="/explore" 
-                  className="group flex items-center gap-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-all font-semibold py-3.5 px-4 rounded-xl"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <Compass className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
-                  Explore
-                </Link>
-                <Link 
                   href="/trips" 
-                  className="group flex items-center gap-3 text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-all font-semibold py-3.5 px-4 rounded-xl"
+                  className="flex items-center gap-2 text-gray-700 hover:text-indigo-600 transition-colors font-medium py-2"
                   onClick={() => setIsOpen(false)}
                 >
-                  <MapPin className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  <MapPin className="w-4 h-4" />
                   My Trips
                 </Link>
 
@@ -293,41 +264,31 @@ export default function Navbar() {
                     auth.signOut();
                     setIsOpen(false);
                   }}
-                  className="group flex items-center gap-3 text-red-600 hover:bg-red-50 transition-all font-semibold py-3.5 px-4 rounded-xl text-left"
+                  className="flex items-center gap-2 text-gray-700 hover:text-red-600 transition-colors font-medium py-2 text-left"
                 >
-                  <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  <LogOut className="w-4 h-4" />
                   Logout
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 <Link 
                   href="/features" 
-                  className="text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all font-semibold py-3.5 px-4 rounded-xl"
+                  className="text-gray-700 hover:text-indigo-600 transition-colors font-medium py-2"
                   onClick={() => setIsOpen(false)}
                 >
                   Features
                 </Link>
                 <Link 
-                  href="/explore" 
-                  className="text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-all font-semibold py-3.5 px-4 rounded-xl"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Explore
-                </Link>
-                <Link 
                   href="/pricing" 
-                  className="text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-all font-semibold py-3.5 px-4 rounded-xl"
+                  className="text-gray-700 hover:text-indigo-600 transition-colors font-medium py-2"
                   onClick={() => setIsOpen(false)}
                 >
                   Pricing
                 </Link>
-
-                <div className="h-px bg-gray-200 my-2"></div>
-
                 <Link 
                   href="/login" 
-                  className="text-gray-700 hover:text-indigo-600 hover:bg-gray-50 transition-all font-semibold py-3.5 px-4 rounded-xl text-center"
+                  className="text-gray-700 hover:text-indigo-600 transition-colors font-medium py-2"
                   onClick={() => setIsOpen(false)}
                 >
                   Login
@@ -338,29 +299,12 @@ export default function Navbar() {
                   onClick={() => setIsOpen(false)}
                 >
                   Get Started
-                  <Sparkles className="w-5 h-5" />
                 </Link>
               </div>
             )}
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-      `}</style>
     </nav>
   );
 }
