@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import { Sun, Utensils, Moon, Save, MapPin, Check } from "lucide-react";
 
 type ItineraryDay = {
@@ -10,12 +11,14 @@ type ItineraryDay = {
   evening: string;
 };
 
+type TimeSlotKey = Exclude<keyof ItineraryDay, "day">;
+
 export default function ItineraryCard({
   itinerary,
   onSave,
 }: {
   itinerary: ItineraryDay[];
-  onSave?: () => void;
+  onSave?: () => void | Promise<void>;
 }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -31,10 +34,16 @@ export default function ItineraryCard({
   };
 
   const timeSlots = [
-    { key: 'morning', label: 'Morning', icon: Sun, color: 'text-amber-500', bg: 'bg-amber-50' },
-    { key: 'afternoon', label: 'Afternoon', icon: Utensils, color: 'text-orange-500', bg: 'bg-orange-50' },
-    { key: 'evening', label: 'Evening', icon: Moon, color: 'text-indigo-500', bg: 'bg-indigo-50' },
-  ];
+    { key: "morning", label: "Morning", icon: Sun, color: "text-amber-500", bg: "bg-amber-50" },
+    { key: "afternoon", label: "Afternoon", icon: Utensils, color: "text-orange-500", bg: "bg-orange-50" },
+    { key: "evening", label: "Evening", icon: Moon, color: "text-indigo-500", bg: "bg-indigo-50" },
+  ] as const satisfies ReadonlyArray<{
+    key: TimeSlotKey;
+    label: string;
+    icon: LucideIcon;
+    color: string;
+    bg: string;
+  }>;
 
   return (
     <div className="space-y-6">
