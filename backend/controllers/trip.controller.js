@@ -1,5 +1,6 @@
 const Trip = require("../models/Trip");
 const map = require("../services/map.service");
+const pdf = require("../services/pdf.service");
 
 exports.save = async (req, res) => {
   res.json(await Trip.create({ userId: req.user.uid, ...req.body }));
@@ -79,6 +80,32 @@ exports.updateItineraryDay = async (req, res, next) => {
 
     await trip.save();
     res.json(trip);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.exportPdf = async (req, res, next) => {
+  try {
+    const tripId = req.params.id;
+    if (!tripId) {
+      const err = new Error("Trip id is required");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const trip = await Trip.findOne({ _id: tripId, userId: req.user.uid });
+    if (!trip) {
+      const err = new Error("Trip not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    const tripObj = typeof trip.toObject === "function" ? trip.toObject() : trip;
+    tripObj.itinerary = Array.isArray(tripObj.itinerary) ? tripObj.itinerary : [];
+    tripObj.locations = Array.isArray(tripObj.locations) ? tripObj.locations : [];
+
+    await pdf.createPDF(tripObj, res);
   } catch (err) {
     next(err);
   }
