@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { 
   MapPin, 
@@ -19,7 +19,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 
-export default function CreateItinerary() {
+function CreateItineraryContent() {
   const searchParams = useSearchParams();
   const destinationFromQuery = searchParams.get("destination");
   const interestsFromQueryRaw = searchParams.getAll("interests");
@@ -398,5 +398,22 @@ export default function CreateItinerary() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function CreateItinerary() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mx-auto mb-3" />
+            <p className="text-gray-700 font-medium">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <CreateItineraryContent />
+    </Suspense>
   );
 }

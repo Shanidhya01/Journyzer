@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, Chrome, Sparkles, ArrowRight, AlertCircle } from "lucide-react";
+
+const getErrorMessage = (err: unknown) => {
+  if (err instanceof Error) return err.message;
+  if (err && typeof err === "object" && "message" in err) {
+    const message = (err as { message?: unknown }).message;
+    if (typeof message === "string") return message;
+  }
+  return null;
+};
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -21,8 +30,11 @@ export default function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
-    } catch (err) {
-      setError(err.message || "Failed to sign in. Please check your credentials.");
+    } catch (err: unknown) {
+      setError(
+        getErrorMessage(err) ||
+          "Failed to sign in. Please check your credentials."
+      );
     } finally {
       setLoading(false);
     }
@@ -35,15 +47,15 @@ export default function Login() {
     try {
       await signInWithPopup(auth, googleProvider);
       router.push("/dashboard");
-    } catch (err) {
-      setError(err.message || "Failed to sign in with Google.");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err) || "Failed to sign in with Google.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
       handleEmailLogin();
     }
   };

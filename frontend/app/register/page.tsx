@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, User, Chrome, Sparkles, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
+
+const getErrorMessage = (err: unknown) => {
+  if (err instanceof Error) return err.message;
+  if (err && typeof err === "object" && "message" in err) {
+    const message = (err as { message?: unknown }).message;
+    if (typeof message === "string") return message;
+  }
+  return null;
+};
 
 export default function Register() {
   const router = useRouter();
@@ -43,8 +52,8 @@ export default function Register() {
       const res = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(res.user, { displayName: name });
       router.push("/dashboard");
-    } catch (err) {
-      setError(err.message || "Failed to create account. Please try again.");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err) || "Failed to create account. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -57,15 +66,15 @@ export default function Register() {
     try {
       await signInWithPopup(auth, googleProvider);
       router.push("/dashboard");
-    } catch (err) {
-      setError(err.message || "Failed to sign up with Google.");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err) || "Failed to sign up with Google.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
       register();
     }
   };
