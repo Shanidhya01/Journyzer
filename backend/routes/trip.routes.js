@@ -42,6 +42,13 @@ router.get("/:id", auth, async (req, res, next) => {
 });
 
 /**
+ * @route   GET /api/trips/:id/pdf
+ * @desc    Export trip itinerary as PDF
+ * @access  Protected
+ */
+router.get("/:id/pdf", auth, controller.exportPdf);
+
+/**
  * @route   DELETE /api/trips/:id
  * @desc    Delete a trip
  * @access  Protected

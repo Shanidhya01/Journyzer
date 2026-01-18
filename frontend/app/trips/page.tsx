@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import Link from "next/link";
-import ProtectedRoute from "@/components/ProtectedRoute";
 import { 
   MapPin, 
   Calendar, 
@@ -28,7 +27,7 @@ type Trip = {
   interests?: string[];
 };
 
-function TripsContent() {
+export default function Trips() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -238,12 +237,4 @@ function TripsContent() {
       </div>
     </div>
   );
-}
-
-export default function TripsPage() {
-  return (
-    <ProtectedRoute>
-      <TripsContent />
-    </ProtectedRoute>
-  );
-}
+}  
