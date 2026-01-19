@@ -1,7 +1,21 @@
-const PDFDocument = require("pdfkit");
+let PDFDocument;
+try {
+  // pdfkit is an optional runtime dependency for the PDF export route.
+  // If it isn't installed in the current deployment, don't crash the whole API.
+  // eslint-disable-next-line global-require
+  PDFDocument = require("pdfkit");
+} catch {
+  PDFDocument = null;
+}
 const axios = require("axios");
 
 exports.createPDF = async (trip, res) => {
+  if (!PDFDocument) {
+    return res
+      .status(501)
+      .json({ message: "PDF generation is not available on this deployment." });
+  }
+
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",
