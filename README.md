@@ -1,88 +1,303 @@
-# Journyzer
+# 🌍 Smart Itinerary Generator
 
-Full-stack trip planner:
-- **Frontend:** Next.js App Router (in `frontend/`)
-- **Backend:** Express + MongoDB + Firebase Admin auth (in `backend/`)
+An end‑to‑end **AI‑powered full‑stack travel planning application** that generates **personalized, budget‑aware, day‑wise itineraries** based on user preferences. The system integrates **AI, authentication, database storage, PDF generation**, and a modern responsive UI.
 
-## Local development
+This project is designed to demonstrate **real‑world full‑stack development skills**, API integration, authentication flows, and clean project architecture.
 
-### 1) Backend
+---
 
-1. Create `backend/.env` (use `backend/.env.example` as a template)
-2. Install + run:
-   - `cd backend`
-   - `npm install`
-   - `npm run dev`
+## 📌 Problem Statement
 
-Backend listens on `PORT` (default `5000`) and serves routes under `/api/*`.
+Planning a trip manually requires researching destinations, activities, costs, and daily schedules, which is time‑consuming and inefficient. Most travel apps lack **true personalization** and **AI‑driven planning**.
 
-### 2) Frontend
+### Solution
 
-1. Create `frontend/.env.local` (use `frontend/.env.example` as a template)
-2. Install + run:
-   - `cd frontend`
-   - `npm install`
-   - `npm run dev`
+The **Smart Itinerary Generator** automates trip planning using AI to generate:
 
-Frontend runs on `http://localhost:3000`.
+* Personalized itineraries
+* Day‑wise structured plans
+* Budget‑conscious recommendations
+* Exportable itineraries
 
-## Environment variables
+---
+
+## 🚀 Core Features
+
+### 🔐 Authentication & Authorization
+
+* Firebase Authentication
+* Email & Password login
+* Google OAuth login
+* Secure token‑based backend authentication
+
+### 🧠 AI Itinerary Generation
+
+* Destination selection (country / city)
+* Number of travel days
+* Interest‑based filtering:
+
+  * Beaches
+  * History
+  * Food
+  * Adventure
+  * Nature
+* AI‑generated itinerary using structured prompts
+
+### 📅 Day‑Wise Travel Plan
+
+Each day includes:
+
+* Morning activity
+* Afternoon activity
+* Evening activity
+* Estimated budget
+* Key places to visit
+
+### 💾 Trip Management
+
+* Save itineraries to database
+* Fetch all user trips
+* View trip details anytime
+
+### 📄 PDF Export
+
+* Generate itinerary PDF on demand
+* Server‑side PDF generation using PDFKit
+* Clean, printable layout
+
+### 🎨 UI & UX
+
+* Responsive design (mobile + desktop)
+* Modern card‑based layout
+* Smooth navigation
+* Loading states & error handling
+
+---
+
+## 🧩 System Architecture
+
+```
+Client (Next.js)
+   |
+   |  Firebase Auth Token
+   v
+Backend (Node + Express)
+   |
+   |  MongoDB Queries
+   v
+Database (MongoDB Atlas)
+   |
+   |  AI Prompt
+   v
+AI Service (Gemini / GPT)
+```
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+* Next.js (App Router)
+* TypeScript
+* Tailwind CSS
+* Axios
+* Firebase Authentication
+
+### Backend
+
+* Node.js
+* Express.js
+* MongoDB + Mongoose
+* PDFKit
+* JWT
+
+### AI & APIs
+
+* Gemini / GPT API
+* Google Maps Links
+
+### Deployment
+
+* Frontend: Vercel
+* Backend: Render / Railway
+* Database: MongoDB Atlas
+
+---
+
+## 📁 Complete Project Structure
+
+```
+smart-itinerary-generator/
+│
+├── frontend/
+│   ├── app/
+│   │   ├── layout.tsx           # Root layout
+│   │   ├── page.tsx             # Landing page
+│   │   ├── login/               # Login page
+│   │   ├── register/            # Signup page
+│   │   ├── dashboard/           # User dashboard
+│   │   ├── generate/            # Itinerary generator
+│   │   ├── trips/               # Saved trips
+│   │   └── api/                 # Next.js API routes (if any)
+│   │
+│   ├── components/
+│   │   ├── Navbar.tsx
+│   │   ├── TripCard.tsx
+│   │   ├── ItineraryDay.tsx
+│   │   ├── Button.tsx
+│   │   └── Loader.tsx
+│   │
+│   ├── context/
+│   │   └── AuthContext.tsx      # Global auth state
+│   │
+│   ├── lib/
+│   │   ├── firebase.ts          # Firebase config
+│   │   ├── axios.ts             # Axios instance
+│   │   └── api.ts               # API helpers
+│   │
+│   ├── public/
+│   │   └── images/
+│   │
+│   ├── styles/
+│   │   └── globals.css
+│   │
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── backend/
+│   ├── controllers/
+│   │   ├── authController.js    # Auth logic
+│   │   ├── tripController.js    # Trip CRUD
+│   │   └── pdfController.js     # PDF generation
+│   │
+│   ├── routes/
+│   │   ├── authRoutes.js
+│   │   ├── tripRoutes.js
+│   │   └── pdfRoutes.js
+│   │
+│   ├── models/
+│   │   └── Trip.js              # Mongoose schema
+│   │
+│   ├── services/
+│   │   └── aiService.js         # AI prompt logic
+│   │
+│   ├── middleware/
+│   │   └── authMiddleware.js
+│   │
+│   ├── config/
+│   │   └── db.js                # MongoDB connection
+│   │
+│   ├── server.js
+│   ├── package.json
+│   └── .env
+│
+└── README.md
+```
+
+---
+
+## 🔑 Environment Variables
 
 ### Backend (`backend/.env`)
 
-Required:
-- `MONGO_URI`
-- `GEMINI_API_KEY`
-- `GOOGLE_MAPS_KEY` (geocoding)
-- `GOOGLE_MAPS_API_KEY` (static map images in PDFs)
-- One of:
-  - `FIREBASE_SERVICE_ACCOUNT_JSON` (recommended), **or**
-  - `FIREBASE_SERVICE_ACCOUNT` (alias), **or**
-  - `FIREBASE_PROJECT_ID` + `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY`
-
-CORS (set at least one to your frontend URL):
-- `CLIENT_ORIGIN` or `FRONTEND_URL` or `CORS_ORIGIN`
-
-Note: the Firebase private key must usually be stored with `\\n` newlines and will be converted at runtime.
+```
+PORT=5000
+MONGO_URI=your_mongodb_uri
+AI_API_KEY=your_ai_key
+JWT_SECRET=your_secret
+```
 
 ### Frontend (`frontend/.env.local`)
 
-Required:
-- `NEXT_PUBLIC_API_URL` (example: `http://localhost:5000` or `http://localhost:5000/api`)
-- `NEXT_PUBLIC_FIREBASE_API_KEY`
-- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
-- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=xxx
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=xxx
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=xxx
+NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
+```
 
-## Deploying to Vercel
+---
 
-You should deploy **two** Vercel projects: one for `backend/` and one for `frontend/`.
+## ⚙️ Installation & Running Locally
 
-### Backend on Vercel
+### 1️⃣ Clone Repository
 
-- Project Root Directory: `backend`
-- This repo includes [backend/vercel.json](backend/vercel.json) which routes `/api/*` to a single Serverless Function.
-- Entrypoint is [backend/api/index.js](backend/api/index.js) (Express app exported, no `listen()` call).
+```
+git clone https://github.com/your-username/smart-itinerary-generator.git
+cd smart-itinerary-generator
+```
 
-Add backend env vars in Vercel → Project → Settings → Environment Variables:
-- `MONGO_URI`
-- `GEMINI_API_KEY`
-- `GOOGLE_MAPS_KEY`
-- `GOOGLE_MAPS_API_KEY`
-- `FIREBASE_SERVICE_ACCOUNT_JSON` (or the split vars)
-- `FRONTEND_URL` (set to your deployed frontend URL, e.g. `https://<your-frontend>.vercel.app`)
+### 2️⃣ Backend Setup
 
-### Frontend on Vercel
+```
+cd backend
+npm install
+npm start
+```
 
-- Project Root Directory: `frontend`
-- [frontend/vercel.json](frontend/vercel.json) only adds security headers; Vercel detects Next.js automatically.
+### 3️⃣ Frontend Setup
 
-Add frontend env vars:
-- `NEXT_PUBLIC_API_URL` = `https://<your-backend-vercel-domain>` (or `.../api`)
-- `NEXT_PUBLIC_FIREBASE_API_KEY`
-- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
-- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+```
+cd frontend
+npm install
+npm run dev
+```
 
-## Security reminders
+---
 
-- Do **not** commit `.env` files or service account JSON.
-- If a Firebase service account key was ever shared publicly, revoke/rotate it in Google Cloud/Firebase and update your env vars.
+## 🔄 Authentication Flow
+
+1. User logs in using Firebase
+2. Firebase returns ID Token
+3. Token sent to backend
+4. Backend verifies token
+5. User session created
+
+---
+
+## 📄 PDF Export Flow
+
+1. Frontend sends itinerary JSON
+2. Backend generates PDF using PDFKit
+3. PDF streamed as response
+4. Browser downloads PDF
+
+---
+
+## 🧪 Error Handling & Security
+
+* Protected routes
+* Token verification
+* API error responses
+* Environment variable protection
+
+---
+
+## 📌 Future Enhancements
+
+* Hotel & flight booking integration
+* Real‑time map embedding
+* Cost comparison APIs
+* Multi‑language support
+* Group trip collaboration
+
+---
+
+## 👨‍💻 Author
+
+**Shanidhya Kumar**
+Full‑Stack Developer | AI & Web Development Enthusiast
+
+---
+
+## ⭐ Acknowledgements
+
+* Firebase
+* MongoDB
+* Google APIs
+* OpenAI / Gemini
+
+---
+
+If you found this project useful, don’t forget to ⭐ the repository!
