@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import WikiImage from "@/components/WikiImage";
 import {
   Compass,
   Search,
@@ -152,7 +153,9 @@ export default function ExplorePage() {
   const [query, setQuery] = useState("");
   const [region, setRegion] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<"popular" | "rating" | "trending">("popular");
+  const [sortBy, setSortBy] = useState<"popular" | "rating" | "trending">(
+    "popular",
+  );
 
   const regions = useMemo(() => {
     const set = new Set<string>();
@@ -195,7 +198,7 @@ export default function ExplorePage() {
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
 
@@ -216,7 +219,9 @@ export default function ExplorePage() {
               <div>
                 <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-md px-5 py-2.5 rounded-full shadow-lg mb-4 border border-indigo-100">
                   <Globe className="w-5 h-5 text-indigo-600 animate-pulse" />
-                  <span className="text-sm font-bold text-gray-800 uppercase tracking-wider">Explore World</span>
+                  <span className="text-sm font-bold text-gray-800 uppercase tracking-wider">
+                    Explore World
+                  </span>
                 </div>
                 <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-3 leading-tight">
                   Discover Your Next
@@ -225,7 +230,8 @@ export default function ExplorePage() {
                   </span>
                 </h1>
                 <p className="text-lg text-gray-600 max-w-2xl">
-                  Explore curated destinations and start planning your dream trip in one click.
+                  Explore curated destinations and start planning your dream
+                  trip in one click.
                 </p>
               </div>
 
@@ -298,7 +304,9 @@ export default function ExplorePage() {
               {/* Interest Tags */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-sm font-bold text-gray-700">Filter by interests:</span>
+                  <span className="text-sm font-bold text-gray-700">
+                    Filter by interests:
+                  </span>
                   {selectedTags.length > 0 && (
                     <button
                       onClick={() => setSelectedTags([])}
@@ -333,7 +341,9 @@ export default function ExplorePage() {
           {/* Results Count */}
           <div className="mb-6">
             <p className="text-gray-600 font-medium">
-              Showing <span className="font-bold text-gray-900">{filtered.length}</span> destination{filtered.length !== 1 ? "s" : ""}
+              Showing{" "}
+              <span className="font-bold text-gray-900">{filtered.length}</span>{" "}
+              destination{filtered.length !== 1 ? "s" : ""}
             </p>
           </div>
 
@@ -348,8 +358,12 @@ export default function ExplorePage() {
                   <MapPin className="w-12 h-12 text-gray-400" />
                 </div>
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-3">No destinations found</h3>
-              <p className="text-gray-600 text-lg mb-6">Try adjusting your filters or search terms</p>
+              <h3 className="text-3xl font-bold text-gray-900 mb-3">
+                No destinations found
+              </h3>
+              <p className="text-gray-600 text-lg mb-6">
+                Try adjusting your filters or search terms
+              </p>
               <button
                 onClick={() => {
                   setQuery("");
@@ -369,32 +383,19 @@ export default function ExplorePage() {
                   className="group bg-white/90 backdrop-blur-lg rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden border border-white/50 hover:scale-105 hover:-translate-y-2"
                   style={{ animationDelay: `${idx * 50}ms` }}
                 >
-                  {/* Card Header with Gradient */}
-                  <div className={`h-48 bg-gradient-to-br ${d.imageGradient || gradientFor(d.color)} relative overflow-hidden`}>
+                  {/* Card Header with City Image */}
+                  <div className="h-48 relative overflow-hidden rounded-t-3xl bg-gray-200">
+                    <WikiImage
+                      city={d.name}
+                      country={d.country}
+                      gradient={d.imageGradient || gradientFor(d.color)}
+                    />
+
                     {/* Pattern Overlay */}
-                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30"></div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                    
-                    {/* Badges */}
-                    <div className="absolute top-4 right-4 flex gap-2">
-                      {d.trending && (
-                        <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
-                          <TrendingUp className="w-3.5 h-3.5 text-orange-600" />
-                          <span className="text-xs font-bold text-orange-600">Trending</span>
-                        </div>
-                      )}
-                    </div>
+                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30 pointer-events-none" />
 
-                    {/* Icon */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-white/30 blur-2xl rounded-full"></div>
-                        <Plane className="relative w-16 h-16 text-white/90 group-hover:rotate-12 group-hover:scale-110 transition-transform duration-500" />
-                      </div>
-                    </div>
-
-                    {/* Bottom gradient overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/90 to-transparent"></div>
+                    {/* Bottom fade */}
+                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/90 to-transparent pointer-events-none" />
                   </div>
 
                   {/* Card Content */}
@@ -414,12 +415,16 @@ export default function ExplorePage() {
                       {d.rating && (
                         <div className="flex items-center gap-1 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200">
                           <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                          <span className="text-sm font-bold text-amber-700">{d.rating}</span>
+                          <span className="text-sm font-bold text-amber-700">
+                            {d.rating}
+                          </span>
                         </div>
                       )}
                     </div>
 
-                    <p className="text-gray-700 mb-5 leading-relaxed">{d.highlight}</p>
+                    <p className="text-gray-700 mb-5 leading-relaxed">
+                      {d.highlight}
+                    </p>
 
                     {/* Tags */}
                     <div className="flex flex-wrap gap-2 mb-6">
@@ -457,9 +462,16 @@ export default function ExplorePage() {
 
         <style jsx>{`
           @keyframes blob {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
+            0%,
+            100% {
+              transform: translate(0, 0) scale(1);
+            }
+            33% {
+              transform: translate(30px, -50px) scale(1.1);
+            }
+            66% {
+              transform: translate(-20px, 20px) scale(0.9);
+            }
           }
           .animate-blob {
             animation: blob 7s infinite;
