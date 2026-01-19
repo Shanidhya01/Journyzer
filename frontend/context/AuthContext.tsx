@@ -13,26 +13,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (firebaseUser) => {
-      try {
-        if (firebaseUser) {
-          // Keep UI logged in even if backend sync fails.
+      if (firebaseUser) {
+        try {
+          const token = await firebaseUser.getIdToken();
+          await api.post("/auth/login", { firebaseToken: token });
           setUser(firebaseUser);
-
-          try {
-            const token = await firebaseUser.getIdToken();
-            await api.post("/auth/login", { firebaseToken: token });
-          } catch (err) {
-            // Common causes: backend not running, wrong NEXT_PUBLIC_API_URL, or CORS.
-            // We intentionally don't block UI auth on this.
-            // eslint-disable-next-line no-console
-            console.error("Backend auth sync failed (/auth/login):", err);
-          }
-        } else {
-          setUser(null);
+        } catch (err) {
+          // Common causes: backend not running, wrong NEXT_PUBLIC_API_URL, or CORS misconfig.
+          console.error("Backend auth sync failed (/auth/login):", err);
+          // Keep the Firebase user in UI so the app can still render; API calls may fail until backend is reachable.
+          setUser(firebaseUser);
         }
-      } finally {
-        setLoading(false);
+      } else {
+        setUser(null);
       }
+      setLoading(false);
     });
   }, []);
 

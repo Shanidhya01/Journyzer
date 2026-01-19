@@ -1,8 +1,32 @@
-import { MapPin, Calendar, DollarSign, Sparkles, ArrowRight, Globe2, Clock, Users } from 'lucide-react';
+"use client";
+
+import { useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import {
+  MapPin,
+  Calendar,
+  DollarSign,
+  Sparkles,
+  ArrowRight,
+  Globe2,
+  Clock,
+  Users,
+} from "lucide-react";
 
 export default function Home() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/dashboard");
+    }
+  }, [loading, user, router]);
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <main className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center max-w-4xl mx-auto">
@@ -13,7 +37,7 @@ export default function Home() {
           
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
             Plan Your Dream Trip
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+            <span className="block text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-purple-600">
               in Minutes, Not Hours
             </span>
           </h1>
@@ -23,13 +47,13 @@ export default function Home() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a 
-              href="/login" 
+            <Link
+              href={!loading && user ? "/dashboard" : "/login"}
               className="group bg-indigo-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl hover:bg-indigo-700 transition-all flex items-center gap-2"
             >
-              Start Planning Free
+              {!loading && user ? "Go to Dashboard" : "Start Planning Free"}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </a>
+            </Link>
             <button className="text-indigo-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/50 transition-all">
               See How It Works
             </button>

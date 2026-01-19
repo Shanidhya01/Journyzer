@@ -1,7 +1,10 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import api from "@/lib/api";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { 
   MapPin, 
   Calendar, 
@@ -19,8 +22,9 @@ import {
   CheckCircle2
 } from "lucide-react";
 
-function CreateItineraryContent() {
+export default function CreateItinerary() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const destinationFromQuery = searchParams.get("destination");
   const interestsFromQueryRaw = searchParams.getAll("interests");
 
@@ -111,29 +115,34 @@ function CreateItineraryContent() {
 
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setData({
-        destination: destination,
-        days: days,
-        budget: budget,
-        interests: interests,
-        itinerary: [
-          {
-            day: 1,
-            activities: [
-              { time: "9:00 AM", title: "Arrival & Hotel Check-in", description: "Settle into your accommodation" },
-              { time: "12:00 PM", title: "Local Cuisine Lunch", description: "Try authentic local dishes" },
-              { time: "3:00 PM", title: "City Walking Tour", description: "Explore main attractions" }
-            ]
-          }
-        ]
+    try {
+      const res = await api.post("/itinerary/generate", {
+        destination: destination.trim(),
+        days,
+        budget,
+        interests,
       });
+
+      const trip = (res.data as any)?.trip;
+      if (trip?._id) {
+        router.push(`/trips/${trip._id}`);
+        return;
+      }
+
+      // Fallback: still show something if API shape changes
+      setData(res.data);
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.message ||
+          "Failed to generate itinerary. Please ensure you're logged in and the backend is running."
+      );
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -175,7 +184,7 @@ function CreateItineraryContent() {
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
                 placeholder="e.g., Paris, Tokyo, New York, Bali..."
-                className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl text-gray-800 focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-lg placeholder:text-gray-400 bg-white/50"
+                className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-lg placeholder:text-gray-400 bg-white/50"
               />
             </div>
 
@@ -342,7 +351,7 @@ function CreateItineraryContent() {
           </div>
         </div>
 
-        {/* Results */}
+        {/* Results (fallback only; normally we redirect to the created trip) */}
         {data && (
           <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 md:p-10 border border-white/20 animate-fade-in">
             <div className="flex items-center gap-3 mb-6">
@@ -351,12 +360,12 @@ function CreateItineraryContent() {
               </div>
               <div>
                 <h2 className="text-3xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Your {data.destination} Itinerary
+                  Itinerary Generated
                 </h2>
-                <p className="text-gray-600">{data.days} days of adventure • {data.budget} budget</p>
+                <p className="text-gray-600">We couldn’t auto-open the trip page, but the response is shown below.</p>
               </div>
             </div>
-            
+
             <div className="bg-linear-to-br from-gray-50 to-gray-100 p-6 rounded-2xl border-2 border-gray-200">
               <pre className="overflow-auto text-sm text-gray-700 font-mono">
                 {JSON.stringify(data, null, 2)}
@@ -398,22 +407,6 @@ function CreateItineraryContent() {
         }
       `}</style>
     </div>
-  );
-}
-
-export default function CreateItinerary() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mx-auto mb-3" />
-            <p className="text-gray-700 font-medium">Loading...</p>
-          </div>
-        </div>
-      }
-    >
-      <CreateItineraryContent />
-    </Suspense>
+    </ProtectedRoute>
   );
 }

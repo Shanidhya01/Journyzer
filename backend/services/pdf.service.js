@@ -2,14 +2,14 @@ const PDFDocument = require("pdfkit");
 const axios = require("axios");
 
 exports.createPDF = async (trip, res) => {
-  const doc = new PDFDocument({ margin: 40 });
-  doc.pipe(res);
-
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",
     `attachment; filename=trip-${trip.destination || "itinerary"}.pdf`
   );
+
+  const doc = new PDFDocument({ margin: 40 });
+  doc.pipe(res);
 
   // ================= TITLE =================
   const destination = trip?.destination || "Your Trip";

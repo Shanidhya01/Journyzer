@@ -156,7 +156,6 @@ export default function TripDetailsPage() {
   const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [exportingPdf, setExportingPdf] = useState(false);
   const [error, setError] = useState<string>("");
   const [selectedDay, setSelectedDay] = useState<number>(1);
 
@@ -287,62 +286,31 @@ export default function TripDetailsPage() {
     }
   };
 
-  const hasItinerary = useMemo(() => {
-    if (!trip) return false;
-    if (!Array.isArray(trip.itinerary)) return false;
-    return (trip.itinerary as any[]).length > 0;
-  }, [trip]);
-
   const downloadPDF = async () => {
-    if (!trip?._id) return;
+    if (!trip || !trip.itinerary) return;
 
-    setExportingPdf(true);
-    setError("");
-    try {
-      const response = await api.get(`/trips/${trip._id}/pdf`, {
+    const response = await api.post(
+      "/pdf/trip",
+      {
+        destination: trip.destination,
+        itinerary: trip.itinerary,
+        locations: trip.locations,
+      },
+      {
         responseType: "blob",
-      });
-
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-
-      const safeBase = String(trip.destination || "trip")
-        .trim()
-        .replace(/[\\/:*?"<>|]+/g, "_")
-        .replace(/\s+/g, " ");
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${safeBase}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      window.URL.revokeObjectURL(url);
-    } catch (err: any) {
-      let message = "Failed to export PDF";
-      const data = err?.response?.data;
-
-      if (data instanceof Blob) {
-        try {
-          const text = await data.text();
-          try {
-            const parsed = JSON.parse(text);
-            message = parsed?.message || message;
-          } catch {
-            if (text) message = text;
-          }
-        } catch {
-          // ignore
-        }
-      } else {
-        message = err?.response?.data?.message || err?.message || message;
       }
+    );
 
-      setError(message);
-    } finally {
-      setExportingPdf(false);
-    }
+    const blob = new Blob([response.data], {
+      type: "application/pdf",
+    });
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${trip.destination || "trip"}.pdf`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -504,22 +472,14 @@ export default function TripDetailsPage() {
                           )}
                         </span>
                       </button>
-                      <button
-                        onClick={downloadPDF}
-                        disabled={!hasItinerary || exportingPdf}
-                        className="bg-white text-indigo-700 border-2 border-indigo-500 px-8 py-3 rounded-2xl font-bold hover:bg-indigo-50 transition-all inline-flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title={!hasItinerary ? "Generate itinerary first" : "Download as PDF"}
-                      >
-                        {exportingPdf ? (
-                          <>
-                            <Loader2 className="w-5 h-5 animate-spin" /> Exporting...
-                          </>
-                        ) : (
-                          <>
-                            <Download className="w-5 h-5" /> Export Itinerary as PDF
-                          </>
-                        )}
-                      </button>
+                      {!!trip.itinerary && (
+                        <button
+                          onClick={downloadPDF}
+                          className="bg-white text-indigo-700 border-2 border-indigo-500 px-8 py-3 rounded-2xl font-bold hover:bg-indigo-50 transition-all inline-flex items-center justify-center gap-3"
+                        >
+                          <Download className="w-5 h-5" /> Export Itinerary as PDF
+                        </button>
+                      )}
 
                       {!!trip.itinerary && (
                         <div className="text-center">

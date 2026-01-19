@@ -163,7 +163,7 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link 
+                {/* <Link 
                   href="/features" 
                   className="text-gray-700 hover:text-indigo-600 transition-all font-semibold px-4 py-2.5 rounded-xl hover:bg-indigo-50"
                 >
@@ -180,7 +180,7 @@ export default function Navbar() {
                   className="text-gray-700 hover:text-pink-600 transition-all font-semibold px-4 py-2.5 rounded-xl hover:bg-pink-50"
                 >
                   Pricing
-                </Link>
+                </Link> */}
 
                 <div className="w-px h-8 bg-gray-200 mx-2"></div>
 
@@ -294,7 +294,7 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex flex-col gap-2">
-                <Link 
+                {/* <Link 
                   href="/features" 
                   className="text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-all font-semibold py-3.5 px-4 rounded-xl"
                   onClick={() => setIsOpen(false)}
@@ -314,7 +314,7 @@ export default function Navbar() {
                   onClick={() => setIsOpen(false)}
                 >
                   Pricing
-                </Link>
+                </Link> */}
 
                 <div className="h-px bg-gray-200 my-2"></div>
 
