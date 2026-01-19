@@ -48,7 +48,7 @@ Note: the Firebase private key must usually be stored with `\\n` newlines and wi
 ### Frontend (`frontend/.env.local`)
 
 Required:
-- `NEXT_PUBLIC_API_URL` (example: `http://localhost:5000/api`)
+- `NEXT_PUBLIC_API_URL` (example: `http://localhost:5000` or `http://localhost:5000/api`)
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
 - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
 - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
@@ -77,7 +77,7 @@ Add backend env vars in Vercel → Project → Settings → Environment Variable
 - [frontend/vercel.json](frontend/vercel.json) only adds security headers; Vercel detects Next.js automatically.
 
 Add frontend env vars:
-- `NEXT_PUBLIC_API_URL` = `https://<your-backend-vercel-domain>/api`
+- `NEXT_PUBLIC_API_URL` = `https://<your-backend-vercel-domain>` (or `.../api`)
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
 - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
 - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
