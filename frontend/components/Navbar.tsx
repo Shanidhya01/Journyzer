@@ -25,7 +25,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const brandHref = !loading && user ? "/dashboard" : "/";
+  const brandHref = user ? "/dashboard" : "/";
 
   // Handle scroll effect
   useEffect(() => {
@@ -61,7 +61,16 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-2">
-            {user ? (
+            {loading ? (
+              <div className="flex items-center gap-3 animate-pulse">
+                <div className="h-10 w-28 rounded-xl bg-gray-200" />
+                <div className="h-10 w-24 rounded-xl bg-gray-200" />
+                <div className="h-10 w-24 rounded-xl bg-gray-200" />
+                <div className="w-px h-8 bg-gray-200 mx-2"></div>
+                <div className="h-10 w-10 rounded-xl bg-gray-200" />
+                <div className="h-10 w-14 rounded-xl bg-gray-200" />
+              </div>
+            ) : user ? (
               <>
                 <Link 
                   href="/dashboard" 
