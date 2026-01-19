@@ -1,21 +1,15 @@
-const isHttpsRequest = (req) => {
-  if (!req) return false;
-  if (req.secure) return true;
-  const forwardedProto = req.headers?.["x-forwarded-proto"];
-  if (typeof forwardedProto === "string") {
-    return forwardedProto.split(",")[0].trim() === "https";
-  }
-  return false;
-};
+const isProd = process.env.NODE_ENV === "production";
 
 const getCookieOptions = (req) => {
-  // SameSite=None requires Secure=true in modern browsers.
-  const secure = process.env.NODE_ENV === "production" || isHttpsRequest(req);
+  // In local development (http://localhost) a `secure: true` cookie will NOT be set/sent.
+  // In production (https) we must use SameSite=None + Secure for cross-site cookies.
+  const secure = isProd;
+  const sameSite = isProd ? "none" : "lax";
 
   return {
     httpOnly: true,
     secure,
-    sameSite: secure ? "none" : "lax",
+    sameSite,
     path: "/",
   };
 };

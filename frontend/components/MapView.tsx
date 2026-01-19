@@ -28,24 +28,22 @@ const defaultMapOptions = {
 };
 
 export default function MapView({ locations, onLocationClick, height = 500, zoom = 12 }: Props) {
-  const googleMapsApiKey =
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ||
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
 
-  if (!googleMapsApiKey) {
+  if (!apiKey) {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-8 text-center">
-        <MapPin className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-yellow-900 mb-2">Map API key missing</h3>
-        <p className="text-yellow-800">
-          Set <span className="font-mono">NEXT_PUBLIC_GOOGLE_MAPS_KEY</span> (or <span className="font-mono">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</span>) in your frontend .env and restart the dev server.
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 text-center">
+        <MapPin className="w-12 h-12 text-amber-600 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-amber-900 mb-2">Map unavailable</h3>
+        <p className="text-amber-800">
+          Missing <span className="font-mono">NEXT_PUBLIC_GOOGLE_MAPS_KEY</span> in the frontend environment.
         </p>
       </div>
     );
   }
 
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey,
+    googleMapsApiKey: apiKey,
   });
 
   if (loadError) {
@@ -53,7 +51,13 @@ export default function MapView({ locations, onLocationClick, height = 500, zoom
       <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
         <MapPin className="w-12 h-12 text-red-500 mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-red-900 mb-2">Failed to load map</h3>
-        <p className="text-red-700">Please check your Google Maps API key and try again.</p>
+        <p className="text-red-700">
+          Google Maps failed to load. Common causes: invalid/locked API key, missing billing,
+          or the <span className="font-mono">Maps JavaScript API</span> not enabled for this key.
+        </p>
+        <p className="text-xs text-red-600 mt-3 break-words">
+          {String((loadError as any)?.message || loadError)}
+        </p>
       </div>
     );
   }
