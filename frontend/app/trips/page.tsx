@@ -30,6 +30,7 @@ type Trip = {
 export default function Trips() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
@@ -41,6 +42,10 @@ export default function Trips() {
       })
       .catch(err => {
         console.error(err);
+        setError(
+          err?.response?.data?.message ||
+            "Failed to load your trips. Please try again."
+        );
         setLoading(false);
       });
   }, []);
@@ -68,6 +73,24 @@ export default function Trips() {
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading your trips...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
+        <div className="bg-white rounded-2xl shadow-md p-8 max-w-xl w-full">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Failed to load your trips
+          </h2>
+          <p className="text-gray-700 mb-4">{error}</p>
+          <p className="text-sm text-gray-600">
+            If this only happens after deployment, double-check your backend URL
+            configuration (e.g. `NEXT_PUBLIC_API_URL`) and that your backend is
+            reachable.
+          </p>
         </div>
       </div>
     );

@@ -1,17 +1,27 @@
 import axios from "axios";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL;
+const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
-if (!baseURL) {
-  // eslint-disable-next-line no-console
+const normalizeApiBaseUrl = (value?: string) => {
+  if (!value) return "/api";
+
+  // Trim trailing slashes for consistent joining
+  const trimmed = value.replace(/\/+$/, "");
+  // If user already provided .../api, keep it; otherwise append /api.
+  return /\/api$/i.test(trimmed) ? trimmed : `${trimmed}/api`;
+};
+
+const baseURL = normalizeApiBaseUrl(rawBaseUrl);
+
+if (!rawBaseUrl) {
   console.warn(
-    "NEXT_PUBLIC_API_URL is not set. API requests will use relative URLs and likely fail."
+    "NEXT_PUBLIC_API_URL is not set. Falling back to '/api'. Configure it in deployment if your backend is on a separate domain."
   );
 }
 
 const api = axios.create({
   baseURL,
-  withCredentials: true, // VERY IMPORTANT (cookies)
+  withCredentials: true, // required for cookie-based auth
   timeout: 15000,
 });
 
