@@ -250,7 +250,7 @@ export default function ExplorePage() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search destinations, countries, or interests..."
-                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all font-medium"
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all font-medium text-gray-900 placeholder:text-gray-500"
                   />
                   {query && (
                     <button
@@ -268,7 +268,7 @@ export default function ExplorePage() {
                     <select
                       value={region}
                       onChange={(e) => setRegion(e.target.value)}
-                      className="pl-10 pr-10 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all font-semibold bg-white appearance-none cursor-pointer"
+                      className="pl-10 pr-10 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all font-semibold bg-white appearance-none cursor-pointer text-gray-900"
                     >
                       {regions.map((r) => (
                         <option key={r} value={r}>
@@ -280,11 +280,11 @@ export default function ExplorePage() {
                   </div>
 
                   <div className="relative">
-                    <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                    <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as any)}
-                      className="pl-10 pr-10 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all font-semibold bg-white appearance-none cursor-pointer"
+                      className="pl-10 pr-10 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all font-semibold bg-white appearance-none cursor-pointer text-gray-900"
                     >
                       <option value="popular">Popular</option>
                       <option value="rating">Top Rated</option>
