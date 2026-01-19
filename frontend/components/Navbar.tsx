@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
@@ -19,11 +19,14 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-export default function Navbar() {
+// Utility for click outside
+
+function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, loading } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const brandHref = user ? "/dashboard" : "/";
 
@@ -35,6 +38,18 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Close user menu on outside click
+  useEffect(() => {
+    if (!showUserMenu) return;
+    function handleClick(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showUserMenu]);
 
   return (
     <nav 
@@ -97,35 +112,56 @@ export default function Navbar() {
                 {/* Divider */}
                 <div className="w-px h-8 bg-gray-200 mx-2"></div>
 
-                {/* Notifications */}
+                {/* Notifications
                 <button className="relative p-2.5 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all group">
                   <Bell className="w-5 h-5 group-hover:scale-110 transition-transform" />
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                </button>
+                </button> */}
 
                 {/* User Menu */}
-                <div className="relative">
+                <div className="relative" ref={userMenuRef}>
                   <button 
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 transition-all group"
+                    aria-label="User menu"
                   >
                     <div className="relative">
-                      <div className="absolute inset-0 bg-linear-to-br from-indigo-500 to-purple-500 rounded-full blur opacity-50"></div>
-                      <div className="relative w-10 h-10 bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                        <User className="w-5 h-5 text-white" />
-                      </div>
+                      {user.photoURL ? (
+                        <img
+                          src={user.photoURL}
+                          alt={user.displayName || "User"}
+                          className="w-10 h-10 rounded-full object-cover border-2 border-indigo-200 shadow group-hover:scale-110 transition-transform"
+                        />
+                      ) : (
+                        <>
+                          <div className="absolute inset-0 bg-linear-to-br from-indigo-500 to-purple-500 rounded-full blur opacity-50"></div>
+                          <div className="relative w-10 h-10 bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                            <User className="w-5 h-5 text-white" />
+                          </div>
+                        </>
+                      )}
                     </div>
                     <ChevronDown className={`w-4 h-4 text-gray-600 transition-transform ${showUserMenu ? "rotate-180" : ""}`} />
                   </button>
 
                   {/* Dropdown Menu */}
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden">
+                    <div className="absolute right-0 mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden z-50">
                       <div className="p-4 border-b border-gray-100 bg-linear-to-br from-indigo-50/50 to-purple-50/50">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-linear-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
-                            <User className="w-6 h-6 text-white" />
-                          </div>
+                          {user.photoURL ? (
+                            <img
+                              src={user.photoURL}
+                              alt={user.displayName || "User"}
+                              className="w-12 h-12 rounded-full object-cover border-2 border-indigo-200 shadow"
+                            />
+                          ) : (
+                            <>
+                              <div className="w-12 h-12 bg-linear-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                                <User className="w-6 h-6 text-white" />
+                              </div>
+                            </>
+                          )}
                           <div>
                             <p className="font-bold text-gray-900">
                               {user.displayName || "Travel Enthusiast"}
@@ -136,24 +172,6 @@ export default function Navbar() {
                           </div>
                         </div>
                       </div>
-                      {/* <div className="p-2">
-                        <Link
-                          href="/profile"
-                          className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-all font-medium group"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          <User className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                          My Profile
-                        </Link>
-                        <Link
-                          href="/settings"
-                          className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-xl transition-all font-medium group"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                          Settings
-                        </Link>
-                      </div> */}
                       <div className="p-2 border-t border-gray-100">
                         <button 
                           onClick={() => {
@@ -366,3 +384,5 @@ export default function Navbar() {
     </nav>
   );
 }
+
+export default Navbar;

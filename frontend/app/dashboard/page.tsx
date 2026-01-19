@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import WikiImage from "@/components/WikiImage";
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
 import api from "@/lib/api";
@@ -17,6 +18,7 @@ import {
   Loader2,
   AlertCircle
 } from "lucide-react";
+
 
 type Trip = {
   _id: string;
@@ -107,18 +109,65 @@ export default function Dashboard() {
 
           {/* Quick Actions */}
           <div className="grid md:grid-cols-2 gap-6 mb-8">
-            {quickActions.map((action, index) => (
-              <Link key={index} href={action.href}>
-                <div className={`bg-linear-to-r ${action.color} rounded-2xl p-8 text-white hover:shadow-xl transition-all cursor-pointer group`}>
-                  <div className="flex items-start justify-between mb-4">
-                    <action.icon className="w-10 h-10" />
-                    <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+            {/* Plan New Trip Card - visually rich */}
+            <Link href="/create-itinerary">
+              <div className="relative h-48 rounded-3xl overflow-hidden group cursor-pointer">
+                {/* Background Image */}
+                <img
+                  src="https://picsum.photos/seed/plan-new-trip/1200/400"
+                  alt="Plan New Trip"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/90 to-purple-500/70" />
+
+                {/* Content */}
+                <div className="relative h-full flex flex-col justify-between p-6 text-white">
+                  <div className="flex items-center gap-3">
+                    <Sparkles className="w-6 h-6" />
+                    <ArrowRight className="ml-auto w-5 h-5 opacity-80" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">{action.title}</h3>
-                  <p className="text-white/90 text-lg">{action.description}</p>
+
+                  <div>
+                    <h3 className="text-2xl font-bold">Plan New Trip</h3>
+                    <p className="mt-1 text-white/90">
+                      Create AI-powered itinerary
+                    </p>
+                  </div>
                 </div>
-              </Link>
-            ))}
+              </div>
+            </Link>
+
+            {/* Explore Destinations Card - visually rich */}
+            <Link href="/explore">
+              <div className="relative h-48 rounded-3xl overflow-hidden group cursor-pointer">
+                {/* Background Image */}
+                <img
+                  src="https://picsum.photos/seed/explore-destinations/1200/400"
+                  alt="Explore Destinations"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-cyan-500/70" />
+
+                {/* Content */}
+                <div className="relative h-full flex flex-col justify-between p-6 text-white">
+                  <div className="flex items-center gap-3">
+                    <Map className="w-6 h-6" />
+                    <ArrowRight className="ml-auto w-5 h-5 opacity-80" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-2xl font-bold">Explore Destinations</h3>
+                    <p className="mt-1 text-white/90">
+                      Discover new places
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Link>
           </div>
 
           {/* Trips / Empty State */}
@@ -172,10 +221,18 @@ export default function Dashboard() {
                       href={`/trips/${trip._id}`}
                       className="block rounded-2xl border border-gray-200 hover:border-indigo-200 hover:shadow-md transition-all overflow-hidden"
                     >
-                      <div className="h-20 bg-linear-to-r from-indigo-500 to-purple-600 relative">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <MapPin className="w-8 h-8 text-white/80" />
-                        </div>
+                      <div className="h-48 relative overflow-hidden rounded-t-3xl bg-gray-200">
+                        <WikiImage 
+                          city={trip.destination || ""} 
+                          country="" 
+                          gradient="from-indigo-200 to-purple-200" 
+                        />
+
+                        {/* Pattern Overlay */}
+                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30 pointer-events-none" />
+
+                        {/* Bottom fade */}
+                        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/90 to-transparent pointer-events-none" />
                       </div>
                       <div className="p-5">
                         <h4 className="text-lg font-bold text-gray-900 mb-2">

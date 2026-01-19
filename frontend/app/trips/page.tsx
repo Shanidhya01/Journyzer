@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import WikiImage from "@/components/WikiImage";
 import api from "@/lib/api";
 import Link from "next/link";
 import { 
@@ -171,11 +172,20 @@ export default function Trips() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTrips.map((trip) => (
               <div key={trip._id} className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden group">
-                {/* Trip Image/Header */}
-                <div className="h-32 bg-gradient-to-br from-indigo-500 to-purple-600 relative">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <MapPin className="w-12 h-12 text-white/80" />
-                  </div>
+                {/* Trip Image/Header with WikiImage and overlays */}
+                <div className="h-48 relative overflow-hidden rounded-t-3xl bg-gray-200">
+                  <WikiImage 
+                    city={trip.destination || ""} 
+                    country="" 
+                    gradient="from-indigo-200 to-purple-200" 
+                  />
+
+                  {/* Pattern Overlay */}
+                  <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30 pointer-events-none" />
+
+                  {/* Bottom fade */}
+                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/90 to-transparent pointer-events-none" />
+
                   {trip.status && (
                     <span className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold ${
                       trip.status === 'upcoming' ? 'bg-blue-500 text-white' :

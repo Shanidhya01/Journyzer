@@ -136,15 +136,10 @@ export default function CreateItineraryClient() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50">
-        {/* Animated Background Elements */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-          <div className="absolute top-40 right-10 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-          <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-        </div>
+      <div className="relative min-h-screen overflow-hidden bg-travel-pattern">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_#ede9fe_0%,_#f5f3ff_35%,_#ffffff_70%)]" />
 
-        <div className="relative container mx-auto px-4 max-w-5xl py-12">
+        <div className="relative container mx-auto px-4 max-w-5xl py-12 animate-fade-in">
           {/* Header */}
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full shadow-lg mb-6 border border-indigo-100">
@@ -153,7 +148,7 @@ export default function CreateItineraryClient() {
                 AI-Powered Travel Planning
               </span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
               Create Your Perfect Trip
             </h1>
             <p className="text-gray-600 text-xl max-w-2xl mx-auto">
@@ -177,7 +172,7 @@ export default function CreateItineraryClient() {
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
                   placeholder="e.g., Paris, Tokyo, New York, Bali..."
-                  className="w-full px-6 py-4 text-black border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-lg placeholder:text-gray-400 bg-white/50"
+                  className="w-full px-6 py-4 text-black border border-gray-200 rounded-2xl bg-white/90 backdrop-blur-sm text-lg placeholder:text-gray-400 transition-all duration-200 focus:ring-2 focus:ring-purple-400/40 focus:scale-[1.01] focus:border-purple-400 outline-none"
                 />
               </div>
 
@@ -198,7 +193,7 @@ export default function CreateItineraryClient() {
                   max="14"
                   value={days}
                   onChange={(e) => setDays(Number(e.target.value))}
-                  className="w-full h-3 bg-linear-to-r from-purple-200 to-pink-200 rounded-full appearance-none cursor-pointer accent-purple-600"
+                  className="w-full h-3 bg-linear-to-r from-purple-200 to-pink-200 rounded-full appearance-none cursor-pointer accent-purple-600 transition-all duration-200 focus:ring-2 focus:ring-purple-400/40 focus:scale-[1.01]"
                   style={{
                     background: `linear-gradient(to right, rgb(147 51 234) 0%, rgb(147 51 234) ${((days - 1) / 13) * 100}%, rgb(243 232 255) ${((days - 1) / 13) * 100}%, rgb(243 232 255) 100%)`,
                   }}
@@ -301,11 +296,11 @@ export default function CreateItineraryClient() {
                     onChange={(e) => setCustomInterest(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && addCustomInterest()}
                     placeholder="Add your own interest..."
-                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm bg-white"
+                    className="flex-1 px-4 py-3 border border-gray-200 rounded-xl bg-white/90 backdrop-blur-sm text-sm transition-all duration-200 focus:ring-2 focus:ring-purple-400/40 focus:scale-[1.01] focus:border-purple-400 outline-none"
                   />
                   <button
                     onClick={addCustomInterest}
-                    className="px-5 py-3 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl transition-all shadow-md hover:shadow-lg"
+                    className="px-5 py-3 min-h-[48px] bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl transition-all shadow-md hover:shadow-lg"
                   >
                     <Plus className="w-5 h-5" />
                   </button>
@@ -323,7 +318,7 @@ export default function CreateItineraryClient() {
               <button
                 onClick={generate}
                 disabled={loading}
-                className="w-full bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-8 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 relative overflow-hidden group"
+                className="w-full min-h-[48px] bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-8 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 relative overflow-hidden group"
               >
                 <div className="absolute inset-0 bg-linear-to-r from-pink-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <span className="relative flex items-center gap-3">
@@ -371,39 +366,12 @@ export default function CreateItineraryClient() {
         </div>
 
         <style jsx>{`
-          @keyframes blob {
-            0%,
-            100% {
-              transform: translate(0, 0) scale(1);
-            }
-            33% {
-              transform: translate(30px, -50px) scale(1.1);
-            }
-            66% {
-              transform: translate(-20px, 20px) scale(0.9);
-            }
-          }
-          .animate-blob {
-            animation: blob 7s infinite;
-          }
-          .animation-delay-2000 {
-            animation-delay: 2s;
-          }
-          .animation-delay-4000 {
-            animation-delay: 4s;
-          }
-          @keyframes fade-in {
-            from {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
           }
           .animate-fade-in {
-            animation: fade-in 0.5s ease-out;
+            animation: fadeIn 0.5s ease-out forwards;
           }
           @keyframes shake {
             0%,
