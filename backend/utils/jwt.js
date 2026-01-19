@@ -6,12 +6,17 @@ const getCookieOptions = (req) => {
   const secure = isProd;
   const sameSite = isProd ? "none" : "lax";
 
-  return {
+  const options = {
     httpOnly: true,
     secure,
     sameSite,
     path: "/",
   };
+  // Set domain for cross-site cookies in production
+  if (isProd) {
+    options.domain = ".vercel.app";
+  }
+  return options;
 };
 
 exports.getCookieOptions = getCookieOptions;
