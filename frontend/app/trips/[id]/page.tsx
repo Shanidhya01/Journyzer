@@ -461,26 +461,6 @@ export default function TripDetailsPage() {
                     </div>
 
                     <div className="flex flex-col gap-3">
-                      <button
-                        onClick={generateItinerary}
-                        disabled={generating}
-                        className="bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-bold hover:shadow-2xl transition-all inline-flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
-                      >
-                        <div className="absolute inset-0 bg-linear-to-r from-pink-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <span className="relative flex items-center gap-3">
-                          {generating ? (
-                            <>
-                              <Loader2 className="w-5 h-5 animate-spin" />
-                              Creating Magic...
-                            </>
-                          ) : (
-                            <>
-                              <Sparkles className="w-5 h-5" />
-                              Generate Itinerary
-                            </>
-                          )}
-                        </span>
-                      </button>
                       {!!trip.itinerary && (
                         <button
                           onClick={downloadPDF}
