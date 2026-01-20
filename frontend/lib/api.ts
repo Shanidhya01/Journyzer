@@ -1,8 +1,10 @@
 import axios from "axios";
 
-// Always use same-origin /api and let Next.js proxy it via next.config rewrites.
-// This avoids third-party cookie issues in production.
-const baseURL = "/api";
+// Use absolute backend URL in production, fallback to /api locally
+const baseURL =
+  process.env.NODE_ENV === "production"
+    ? process.env.NEXT_PUBLIC_API_URL
+    : "/api";
 
 const api = axios.create({
   baseURL,
