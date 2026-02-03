@@ -611,39 +611,66 @@ export default function TripDetailsPage() {
                                         : (activity as any).name;
                                     const bestTime =
                                       typeof activity === "object" &&
-                                      (activity as any).bestTime
+                                      typeof (activity as any).bestTime ===
+                                        "string"
                                         ? (activity as any).bestTime
                                         : null;
-                                      const ticketPrice =
-                                        typeof activity === "object" &&
-                                        (activity as any).ticketPrice
-                                          ? (activity as any).ticketPrice
-                                          : null;
+                                    const ticketPrice =
+                                      typeof activity === "object" &&
+                                      (typeof (activity as any).ticketPrice ===
+                                        "string" ||
+                                        typeof (activity as any).ticketPrice ===
+                                          "number")
+                                        ? String((activity as any).ticketPrice)
+                                        : null;
                                     const crowdLevel =
                                       typeof activity === "object" &&
-                                      (activity as any).crowdLevel
+                                      typeof (activity as any).crowdLevel ===
+                                        "string"
                                         ? (activity as any).crowdLevel
                                         : null;
                                     const crowdedHours =
                                       typeof activity === "object" &&
-                                      (activity as any).crowdedHours
+                                      typeof (activity as any).crowdedHours ===
+                                        "string"
                                         ? (activity as any).crowdedHours
                                         : null;
                                     const weatherSuitability =
                                       typeof activity === "object" &&
-                                      (activity as any).weatherSuitability
+                                      typeof (activity as any)
+                                        .weatherSuitability === "string"
                                         ? (activity as any).weatherSuitability
                                         : null;
                                     const peakDays =
                                       typeof activity === "object" &&
-                                      (activity as any).peakDays
+                                      Array.isArray((activity as any).peakDays)
                                         ? (activity as any).peakDays
                                         : null;
-                                    const tips =
-                                      typeof activity === "object" &&
-                                      (activity as any).tips
+
+                                    const tipsRaw =
+                                      typeof activity === "object"
                                         ? (activity as any).tips
                                         : null;
+                                    const tipsText =
+                                      typeof tipsRaw === "string"
+                                        ? tipsRaw
+                                        : Array.isArray(tipsRaw)
+                                          ? tipsRaw
+                                              .filter((t) => typeof t === "string")
+                                              .join(" • ")
+                                          : tipsRaw && typeof tipsRaw === "object"
+                                            ? typeof (tipsRaw as any).tips ===
+                                                "string"
+                                              ? (tipsRaw as any).tips
+                                              : Array.isArray((tipsRaw as any).tips)
+                                                ? (tipsRaw as any).tips
+                                                    .filter(
+                                                      (t: unknown) =>
+                                                        typeof t === "string"
+                                                    )
+                                                    .join(" • ")
+                                                : null
+                                            : null;
 
                                     return (
                                       <li
@@ -751,13 +778,13 @@ export default function TripDetailsPage() {
                                           </div>
                                         )}
 
-                                        {tips && (
+                                        {tipsText && (
                                           <div className="ml-9 mt-3 p-2 bg-blue-50 rounded-lg border border-blue-100">
                                             <p className="text-xs text-blue-900">
                                               <span className="font-semibold">
                                                 💡
                                               </span>{" "}
-                                              {tips}
+                                              {tipsText}
                                             </p>
                                           </div>
                                         )}
