@@ -47,14 +47,22 @@ export default function TripPlannerLoading() {
     };
   }, []);
 
+  const seeded01 = (seed: number) => {
+    // Deterministic pseudo-random in [0,1). Must be stable across server/client renders.
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  };
+
   const FloatingIcon = ({
     Icon,
     delay,
+    seed,
     size = "w-8 h-8",
     color = "text-indigo-400",
   }: {
     Icon: LucideIcon;
     delay: number;
+    seed: number;
     size?: string;
     color?: string;
   }) => (
@@ -62,8 +70,8 @@ export default function TripPlannerLoading() {
       className={`absolute ${color} opacity-30 animate-float`}
       style={{ 
         animationDelay: `${delay}s`,
-        left: `${Math.random() * 80 + 10}%`,
-        top: `${Math.random() * 60 + 20}%`
+        left: `${seeded01(seed) * 80 + 10}%`,
+        top: `${seeded01(seed + 42) * 60 + 20}%`
       }}
     >
       <Icon className={size} />
@@ -82,13 +90,13 @@ export default function TripPlannerLoading() {
       </div>
 
       {/* Floating Icons */}
-      <FloatingIcon Icon={Plane} delay={0} color="text-blue-400" />
-      <FloatingIcon Icon={MapPin} delay={0.5} color="text-pink-400" />
-      <FloatingIcon Icon={Camera} delay={1} color="text-purple-400" />
-      <FloatingIcon Icon={Coffee} delay={1.5} color="text-amber-400" />
-      <FloatingIcon Icon={Mountain} delay={2} color="text-emerald-400" />
-      <FloatingIcon Icon={Palmtree} delay={2.5} color="text-green-400" />
-      <FloatingIcon Icon={Globe} delay={3} size="w-12 h-12" color="text-indigo-400" />
+      <FloatingIcon Icon={Plane} delay={0} seed={1} color="text-blue-400" />
+      <FloatingIcon Icon={MapPin} delay={0.5} seed={2} color="text-pink-400" />
+      <FloatingIcon Icon={Camera} delay={1} seed={3} color="text-purple-400" />
+      <FloatingIcon Icon={Coffee} delay={1.5} seed={4} color="text-amber-400" />
+      <FloatingIcon Icon={Mountain} delay={2} seed={5} color="text-emerald-400" />
+      <FloatingIcon Icon={Palmtree} delay={2.5} seed={6} color="text-green-400" />
+      <FloatingIcon Icon={Globe} delay={3} seed={7} size="w-12 h-12" color="text-indigo-400" />
 
       {/* Main Loading Card */}
       <div className="relative z-10 w-full max-w-2xl">

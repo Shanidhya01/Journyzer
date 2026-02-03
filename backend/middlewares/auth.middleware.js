@@ -14,7 +14,10 @@ module.exports = async (req, res, next) => {
 
     req.user = await admin.auth().verifyIdToken(token);
     next();
-  } catch {
+  } catch (err) {
+    // Helpful in production logs when Firebase Admin credentials/project mismatch causes 401s.
+    // Do not log the token.
+    console.error("Auth middleware failed:", err?.message || err);
     res.status(401).json({ message: "Unauthorized" });
   }
 };
