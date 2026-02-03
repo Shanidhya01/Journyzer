@@ -417,7 +417,7 @@ export default function TripDetailsPage() {
                   <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30 pointer-events-none" />
 
                   {/* Bottom fade */}
-                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/90 to-transparent pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-white/90 to-transparent pointer-events-none" />
 
                   {/* Status dots (preserved from original) */}
                   <div className="absolute top-4 right-4">
@@ -586,123 +586,6 @@ export default function TripDetailsPage() {
                   </div>
                 </div>
 
-                {/* New Features Section */}
-                {!!trip.itinerary && (
-                  <>
-                    {/* Alternate Message */}
-                    {alternateMessage && (
-                      <div className="mb-6 p-4 bg-green-50 border-2 border-green-200 rounded-xl animate-fade-in">
-                        <p className="text-green-800 font-semibold">{alternateMessage}</p>
-                      </div>
-                    )}
-
-                    {/* Alternate Plan Generator */}
-                    <AlternatePlanGenerator
-                      tripId={trip._id}
-                      onGenerate={generateAlternatePlan}
-                    />
-
-                    {/* Crowd & Best Time Info */}
-                    {(trip as any).crowdInfo && (
-                      <CrowdInfo crowdInfo={(trip as any).crowdInfo} />
-                    )}
-
-                    {/* Transport Info */}
-                    {(trip as any).transportInfo || (trip as any).estimatedTransportCost !== undefined && (
-                      <TransportInfo
-                        transportInfo={(trip as any).transportInfo || {
-                          totalDistance: "N/A",
-                          totalCost: (trip as any).estimatedTransportCost?.toString() || "0",
-                          totalTime: 0,
-                          mode: (trip as any).transportMode || "Mixed",
-                        }}
-                        currentMode={(trip as any).transportMode}
-                      />
-                    )}
-
-                    {/* Weather Info */}
-                    {(trip as any).weatherInfo && (
-                      <div className="bg-white rounded-2xl shadow-lg p-6 mt-6">
-                        <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                          <Cloud className="w-6 h-6 text-blue-600" />
-                          Weather Information
-                        </h3>
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div className="p-4 bg-blue-50 rounded-xl">
-                            <p className="text-sm text-gray-600 mb-1">Season</p>
-                            <p className="text-lg font-bold text-blue-900 capitalize">
-                              {(trip as any).weatherInfo.season}
-                            </p>
-                          </div>
-                          <div className="p-4 bg-orange-50 rounded-xl">
-                            <p className="text-sm text-gray-600 mb-1">Temperature</p>
-                            <p className="text-lg font-bold text-orange-900">
-                              {(trip as any).weatherInfo.temp}
-                            </p>
-                          </div>
-                          <div className="p-4 bg-green-50 rounded-xl">
-                            <p className="text-sm text-gray-600 mb-1">Condition</p>
-                            <p className="text-lg font-bold text-green-900">
-                              {(trip as any).weatherInfo.condition}
-                            </p>
-                          </div>
-                          <div className="p-4 bg-purple-50 rounded-xl">
-                            <p className="text-sm text-gray-600 mb-1">Suitability</p>
-                            <p className="text-lg font-bold text-purple-900">
-                              {(trip as any).weatherInfo.suitability}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                          <p className="text-sm text-gray-700">{(trip as any).weatherInfo.forecast}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Emergency & Safety Info */}
-                    {(trip as any).emergencyInfo && (
-                      <EmergencyInfo emergencyInfo={(trip as any).emergencyInfo} />
-                    )}
-
-                    {/* Budget Info */}
-                    {(trip as any).maxBudget && (
-                      <div className="bg-white rounded-2xl shadow-lg p-6 mt-6">
-                        <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                          <DollarSign className="w-6 h-6 text-green-600" />
-                          Smart Budget Optimization
-                        </h3>
-                        <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded-lg">
-                          <p className="text-sm font-semibold text-green-900 mb-2">
-                            💰 Budget Optimized!
-                          </p>
-                          <p className="text-sm text-green-800">
-                            Your itinerary has been optimized to fit within your maximum budget of ${(trip as any).maxBudget}. 
-                            We've included free attractions and budget-friendly options.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Trip Pace Info */}
-                    {(trip as any).tripPace && (
-                      <div className="bg-white rounded-2xl shadow-lg p-6 mt-6">
-                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Trip Pace</h3>
-                        <div className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border border-orange-200">
-                          <p className="text-lg font-bold text-orange-900 capitalize mb-2">
-                            {(trip as any).tripPace === "relaxed" && "🐢 Relaxed"}
-                            {(trip as any).tripPace === "balanced" && "🚶 Balanced"}
-                            {(trip as any).tripPace === "fast" && "🏃 Fast-Paced"}
-                          </p>
-                          <p className="text-sm text-gray-700">
-                            Your itinerary is designed for a {(trip as any).tripPace} pace with appropriate 
-                            rest time and activity distribution.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
                 {/* Map Section */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-3">
@@ -815,6 +698,98 @@ export default function TripDetailsPage() {
                         </div>
                       )}
                     </div>
+                  </div>
+
+                  {/* Additional Features - Below Map */}
+                  <div className="space-y-4">
+                    {/* Alternate Message */}
+                    {alternateMessage && (
+                      <div className="p-4 bg-green-50 border-2 border-green-200 rounded-xl animate-fade-in">
+                        <p className="text-green-800 font-semibold">{alternateMessage}</p>
+                      </div>
+                    )}
+
+                    {/* Alternate Plan Generator */}
+                    {!!trip.itinerary && (
+                      <AlternatePlanGenerator
+                        tripId={trip._id}
+                        onGenerate={generateAlternatePlan}
+                      />
+                    )}
+
+                      {/* Crowd & Best Time Info */}
+                      {(trip as any).crowdInfo && (
+                        <CrowdInfo crowdInfo={(trip as any).crowdInfo} />
+                      )}
+
+                      {/* Transport Info */}
+                      {((trip as any).transportInfo || (trip as any).estimatedTransportCost !== undefined) && (
+                        <TransportInfo
+                          transportInfo={(trip as any).transportInfo || {
+                            totalDistance: "N/A",
+                            totalCost: (trip as any).estimatedTransportCost?.toString() || "0",
+                            totalTime: 0,
+                            mode: (trip as any).transportMode || "Mixed",
+                          }}
+                          currentMode={(trip as any).transportMode}
+                        />
+                      )}
+
+                      {/* Weather Info */}
+                      {(trip as any).weatherInfo && (
+                        <div className="bg-white rounded-2xl shadow-lg p-5">
+                          <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                            <Cloud className="w-5 h-5 text-blue-600" />
+                            Weather
+                          </h3>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="p-3 bg-blue-50 rounded-xl">
+                              <p className="text-xs text-gray-600 mb-1">Season</p>
+                              <p className="text-sm font-bold text-blue-900 capitalize">
+                                {(trip as any).weatherInfo.season}
+                              </p>
+                            </div>
+                            <div className="p-3 bg-orange-50 rounded-xl">
+                              <p className="text-xs text-gray-600 mb-1">Temperature</p>
+                              <p className="text-sm font-bold text-orange-900">
+                                {(trip as any).weatherInfo.temp}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Emergency & Safety Info */}
+                      {(trip as any).emergencyInfo && (
+                        <EmergencyInfo emergencyInfo={(trip as any).emergencyInfo} />
+                      )}
+
+                      {/* Budget Info */}
+                      {(trip as any).maxBudget && (
+                        <div className="bg-white rounded-2xl shadow-lg p-4">
+                          <h3 className="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
+                            <DollarSign className="w-4 h-4 text-green-600" />
+                            Budget Optimized
+                          </h3>
+                          <p className="text-xs text-green-800">
+                            Optimized for ${(trip as any).maxBudget} with free & budget-friendly options.
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Trip Pace Info */}
+                      {(trip as any).tripPace && (
+                        <div className="bg-white rounded-2xl shadow-lg p-4">
+                          <h3 className="text-base font-bold text-gray-900 mb-2">
+                            {(trip as any).tripPace === "relaxed" && "🐢 Relaxed Pace"}
+                            {(trip as any).tripPace === "balanced" && "🚶 Balanced Pace"}
+                            {(trip as any).tripPace === "fast" && "🏃 Fast-Paced"}
+                          </h3>
+                          <p className="text-xs text-gray-700">
+                            Designed with appropriate rest time and activity distribution.
+                          </p>
+                        </div>
+                      )}
                   </div>
                 </div>
               </div>
