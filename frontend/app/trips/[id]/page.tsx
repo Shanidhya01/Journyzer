@@ -156,8 +156,9 @@ const EnhancedItineraryCard = ({
 );
 
 export default function TripDetailsPage() {
-  const params = useParams();
-  const id = (params as any)?.id as string | undefined;
+  const params = useParams<{ id?: string | string[] }>();
+  const rawId = params?.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
 
   const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
@@ -251,14 +252,33 @@ export default function TripDetailsPage() {
   };
 
   const fetchTrip = async () => {
-    if (!id) return;
+    if (!id) {
+      setTrip(null);
+      setError("Missing trip id");
+      setLoading(false);
+      return;
+    }
     setError("");
     setLoading(true);
     try {
-      const res = await api.get(`/trips/${id}`);
-      setTrip(res.data as Trip);
+      const res = await api.get(`/trips/${encodeURIComponent(id)}`);
+      const data: unknown = res.data;
+
+      // If the API URL / rewrite is misconfigured, axios may receive an HTML page (string)
+      // or some unexpected payload. Guard to prevent runtime crashes in rendering.
+      if (!data || typeof data !== "object" || typeof (data as Trip)._id !== "string") {
+        throw new Error(
+          "Unexpected response while loading trip. Check NEXT_PUBLIC_API_URL on Vercel and Next rewrites."
+        );
+      }
+
+      setTrip(data as Trip);
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to load trip details");
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to load trip details"
+      );
     } finally {
       setLoading(false);
     }
