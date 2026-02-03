@@ -5,19 +5,21 @@ import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import WikiImage from "@/components/WikiImage";
 import {
-  Compass,
   Search,
   Sparkles,
   MapPin,
   ArrowRight,
   Filter,
   Globe,
-  Plane,
   Star,
   TrendingUp,
   Heart,
   X,
   ChevronDown,
+  Compass,
+  Zap,
+  Users,
+  DollarSign,
 } from "lucide-react";
 
 type Destination = {
@@ -30,6 +32,9 @@ type Destination = {
   rating?: number;
   trending?: boolean;
   imageGradient?: string;
+  averageBudget?: string;
+  bestTime?: string;
+  popularity?: number;
 };
 
 const DESTINATIONS: Destination[] = [
@@ -42,6 +47,9 @@ const DESTINATIONS: Destination[] = [
     color: "indigo",
     rating: 4.2,
     imageGradient: "from-amber-600 via-orange-500 to-red-500",
+    averageBudget: "$30/day",
+    bestTime: "Oct-Mar",
+    popularity: 75,
   },
   {
     name: "Jaipur",
@@ -53,6 +61,9 @@ const DESTINATIONS: Destination[] = [
     rating: 4.7,
     trending: true,
     imageGradient: "from-pink-600 via-rose-500 to-orange-500",
+    averageBudget: "$40/day",
+    bestTime: "Nov-Feb",
+    popularity: 92,
   },
   {
     name: "Goa",
@@ -64,6 +75,9 @@ const DESTINATIONS: Destination[] = [
     rating: 4.8,
     trending: true,
     imageGradient: "from-yellow-600 via-amber-500 to-orange-600",
+    averageBudget: "$35/day",
+    bestTime: "Nov-Mar",
+    popularity: 95,
   },
   {
     name: "Kathmandu",
@@ -74,6 +88,9 @@ const DESTINATIONS: Destination[] = [
     color: "emerald",
     rating: 4.5,
     imageGradient: "from-emerald-600 via-green-500 to-teal-500",
+    averageBudget: "$25/day",
+    bestTime: "Oct-Nov, Mar-Apr",
+    popularity: 80,
   },
   {
     name: "Bangkok",
@@ -85,6 +102,9 @@ const DESTINATIONS: Destination[] = [
     rating: 4.6,
     trending: true,
     imageGradient: "from-blue-600 via-cyan-500 to-teal-500",
+    averageBudget: "$45/day",
+    bestTime: "Nov-Feb",
+    popularity: 88,
   },
   {
     name: "Dubai",
@@ -95,6 +115,9 @@ const DESTINATIONS: Destination[] = [
     color: "indigo",
     rating: 4.9,
     imageGradient: "from-indigo-600 via-purple-500 to-pink-500",
+    averageBudget: "$120/day",
+    bestTime: "Nov-Mar",
+    popularity: 94,
   },
   {
     name: "Paris",
@@ -106,6 +129,9 @@ const DESTINATIONS: Destination[] = [
     rating: 4.9,
     trending: true,
     imageGradient: "from-rose-600 via-pink-500 to-purple-500",
+    averageBudget: "$150/day",
+    bestTime: "Apr-Jun, Sep-Oct",
+    popularity: 98,
   },
   {
     name: "Tokyo",
@@ -116,6 +142,9 @@ const DESTINATIONS: Destination[] = [
     color: "purple",
     rating: 4.8,
     imageGradient: "from-purple-600 via-fuchsia-500 to-pink-500",
+    averageBudget: "$100/day",
+    bestTime: "Mar-May, Sep-Nov",
+    popularity: 96,
   },
   {
     name: "New York",
@@ -126,26 +155,22 @@ const DESTINATIONS: Destination[] = [
     color: "cyan",
     rating: 4.7,
     imageGradient: "from-cyan-600 via-blue-500 to-indigo-500",
+    averageBudget: "$180/day",
+    bestTime: "Apr-Jun, Sep-Nov",
+    popularity: 97,
   },
 ];
 
 function gradientFor(color: Destination["color"]) {
   switch (color) {
-    case "blue":
-      return "from-blue-500 to-cyan-500";
-    case "emerald":
-      return "from-emerald-500 to-teal-500";
-    case "rose":
-      return "from-rose-500 to-pink-500";
-    case "amber":
-      return "from-amber-500 to-orange-500";
-    case "purple":
-      return "from-purple-500 to-fuchsia-500";
-    case "cyan":
-      return "from-cyan-500 to-blue-500";
+    case "blue": return "from-blue-500 to-cyan-500";
+    case "emerald": return "from-emerald-500 to-teal-500";
+    case "rose": return "from-rose-500 to-pink-500";
+    case "amber": return "from-amber-500 to-orange-500";
+    case "purple": return "from-purple-500 to-fuchsia-500";
+    case "cyan": return "from-cyan-500 to-blue-500";
     case "indigo":
-    default:
-      return "from-indigo-500 to-purple-600";
+    default: return "from-indigo-500 to-purple-600";
   }
 }
 
@@ -153,9 +178,8 @@ export default function ExplorePage() {
   const [query, setQuery] = useState("");
   const [region, setRegion] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<"popular" | "rating" | "trending">(
-    "popular",
-  );
+  const [sortBy, setSortBy] = useState<"popular" | "rating" | "trending">("popular");
+  const [showFilters, setShowFilters] = useState(false);
 
   const regions = useMemo(() => {
     const set = new Set<string>();
@@ -186,11 +210,12 @@ export default function ExplorePage() {
       return matchesRegion && matchesQuery && matchesTags;
     });
 
-    // Sort results
     if (sortBy === "rating") {
       results.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     } else if (sortBy === "trending") {
       results.sort((a, b) => (b.trending ? 1 : 0) - (a.trending ? 1 : 0));
+    } else {
+      results.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
     }
 
     return results;
@@ -202,9 +227,13 @@ export default function ExplorePage() {
     );
   };
 
+  const trendingDestinations = useMemo(() => 
+    DESTINATIONS.filter(d => d.trending).slice(0, 3),
+  []);
+
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br  from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
         {/* Animated Background */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
@@ -230,8 +259,7 @@ export default function ExplorePage() {
                   </span>
                 </h1>
                 <p className="text-lg text-gray-600 max-w-2xl">
-                  Explore curated destinations and start planning your dream
-                  trip in one click.
+                  Explore curated destinations and start planning your dream trip in one click.
                 </p>
               </div>
 
@@ -245,6 +273,30 @@ export default function ExplorePage() {
                 <ArrowRight className="relative w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
+
+            {/* Trending Quick Links */}
+            {trendingDestinations.length > 0 && (
+              <div className="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-4 border border-amber-200">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-amber-600" />
+                    <span className="text-sm font-bold text-amber-900">Trending Now:</span>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {trendingDestinations.map(dest => (
+                      <Link
+                        key={dest.name}
+                        href={`/create-itinerary?destination=${encodeURIComponent(dest.name)}`}
+                        className="inline-flex items-center gap-1 bg-white px-3 py-1.5 rounded-full text-sm font-semibold text-gray-700 hover:bg-amber-100 transition-colors border border-amber-200"
+                      >
+                        {dest.name}
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Search and Filters */}
             <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white/50">
@@ -298,11 +350,22 @@ export default function ExplorePage() {
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                   </div>
+
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`lg:hidden px-4 py-4 rounded-2xl border-2 font-semibold transition-all ${
+                      showFilters || selectedTags.length > 0
+                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        : 'bg-white text-gray-700 border-gray-200'
+                    }`}
+                  >
+                    <Filter className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
 
               {/* Interest Tags */}
-              <div>
+              <div className={`${showFilters ? 'block' : 'hidden lg:block'}`}>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-sm font-bold text-gray-700">
                     Filter by interests:
@@ -312,7 +375,7 @@ export default function ExplorePage() {
                       onClick={() => setSelectedTags([])}
                       className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold"
                     >
-                      Clear all
+                      Clear all ({selectedTags.length})
                     </button>
                   )}
                 </div>
@@ -338,13 +401,24 @@ export default function ExplorePage() {
             </div>
           </div>
 
-          {/* Results Count */}
-          <div className="mb-6">
+          {/* Results Count & Active Filters */}
+          <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
             <p className="text-gray-600 font-medium">
-              Showing{" "}
-              <span className="font-bold text-gray-900">{filtered.length}</span>{" "}
-              destination{filtered.length !== 1 ? "s" : ""}
+              Showing <span className="font-bold text-gray-900">{filtered.length}</span> destination{filtered.length !== 1 ? "s" : ""}
             </p>
+            {(selectedTags.length > 0 || region !== "all" || query) && (
+              <button
+                onClick={() => {
+                  setQuery("");
+                  setRegion("all");
+                  setSelectedTags([]);
+                }}
+                className="text-sm text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1"
+              >
+                <X className="w-4 h-4" />
+                Clear all filters
+              </button>
+            )}
           </div>
 
           {/* Grid */}
@@ -355,7 +429,7 @@ export default function ExplorePage() {
                   <div className="w-32 h-32 bg-gradient-to-r from-gray-300 to-gray-400 rounded-full blur-3xl opacity-20"></div>
                 </div>
                 <div className="relative w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto">
-                  <MapPin className="w-12 h-12 text-gray-400" />
+                  <Compass className="w-12 h-12 text-gray-400" />
                 </div>
               </div>
               <h3 className="text-3xl font-bold text-gray-900 mb-3">
@@ -383,51 +457,79 @@ export default function ExplorePage() {
                   className="group bg-white/90 backdrop-blur-lg rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden border border-white/50 hover:scale-105 hover:-translate-y-2"
                   style={{ animationDelay: `${idx * 50}ms` }}
                 >
-                  {/* Card Header with City Image */}
-                  <div className="h-48 relative overflow-hidden rounded-t-3xl bg-gray-200">
+                  {/* Card Header */}
+                  <div className="h-56 relative overflow-hidden bg-gray-200">
                     <WikiImage
                       city={d.name}
                       country={d.country}
                       gradient={d.imageGradient || gradientFor(d.color)}
                     />
 
-                    {/* Pattern Overlay */}
-                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30 pointer-events-none" />
+                    {/* Trending Badge */}
+                    {d.trending && (
+                      <div className="absolute top-4 left-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                        <Zap className="w-3 h-3" />
+                        Trending
+                      </div>
+                    )}
 
-                    {/* Bottom fade */}
-                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/90 to-transparent pointer-events-none" />
+                    {/* Rating Badge */}
+                    {d.rating && (
+                      <div className="absolute top-4 right-4 flex items-center gap-1 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
+                        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                        <span className="text-sm font-bold text-gray-900">{d.rating}</span>
+                      </div>
+                    )}
+
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
                   </div>
 
                   {/* Card Content */}
-                  <div className="p-6 -mt-8 relative">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="text-2xl font-black text-gray-900 mb-1 group-hover:text-indigo-700 transition-colors">
-                          {d.name}
-                        </h3>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <MapPin className="w-4 h-4" />
-                          <span className="font-medium">{d.country}</span>
-                          <span className="text-gray-400">•</span>
-                          <span className="font-medium">{d.region}</span>
-                        </div>
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <h3 className="text-2xl font-black text-gray-900 mb-2 group-hover:text-indigo-700 transition-colors">
+                        {d.name}
+                      </h3>
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                        <MapPin className="w-4 h-4" />
+                        <span className="font-medium">{d.country}</span>
+                        <span className="text-gray-400">•</span>
+                        <span className="font-medium">{d.region}</span>
                       </div>
-                      {d.rating && (
-                        <div className="flex items-center gap-1 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200">
-                          <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                          <span className="text-sm font-bold text-amber-700">
-                            {d.rating}
-                          </span>
+                      <p className="text-gray-700 leading-relaxed line-clamp-2">
+                        {d.highlight}
+                      </p>
+                    </div>
+
+                    {/* Quick Info */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      {d.averageBudget && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="bg-green-100 p-1.5 rounded-lg">
+                            <DollarSign className="w-4 h-4 text-green-600" />
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500 font-medium">Budget</div>
+                            <div className="font-bold text-gray-900">{d.averageBudget}</div>
+                          </div>
+                        </div>
+                      )}
+                      {d.bestTime && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="bg-blue-100 p-1.5 rounded-lg">
+                            <Compass className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500 font-medium">Best Time</div>
+                            <div className="font-bold text-gray-900">{d.bestTime}</div>
+                          </div>
                         </div>
                       )}
                     </div>
 
-                    <p className="text-gray-700 mb-5 leading-relaxed">
-                      {d.highlight}
-                    </p>
-
                     {/* Tags */}
-                    <div className="flex flex-wrap gap-2 mb-6">
+                    <div className="flex flex-wrap gap-2 mb-5">
                       {d.tags.slice(0, 3).map((t) => (
                         <span
                           key={t}
@@ -438,7 +540,7 @@ export default function ExplorePage() {
                       ))}
                       {d.tags.length > 3 && (
                         <span className="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full font-bold">
-                          +{d.tags.length - 3} more
+                          +{d.tags.length - 3}
                         </span>
                       )}
                     </div>
@@ -462,26 +564,13 @@ export default function ExplorePage() {
 
         <style jsx>{`
           @keyframes blob {
-            0%,
-            100% {
-              transform: translate(0, 0) scale(1);
-            }
-            33% {
-              transform: translate(30px, -50px) scale(1.1);
-            }
-            66% {
-              transform: translate(-20px, 20px) scale(0.9);
-            }
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
           }
-          .animate-blob {
-            animation: blob 7s infinite;
-          }
-          .animation-delay-2000 {
-            animation-delay: 2s;
-          }
-          .animation-delay-4000 {
-            animation-delay: 4s;
-          }
+          .animate-blob { animation: blob 7s infinite; }
+          .animation-delay-2000 { animation-delay: 2s; }
+          .animation-delay-4000 { animation-delay: 4s; }
         `}</style>
       </div>
     </ProtectedRoute>

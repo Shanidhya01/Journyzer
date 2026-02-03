@@ -7,6 +7,10 @@ import api from "@/lib/api";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import MapView from "@/components/MapView";
 import WikiImage from "@/components/WikiImage";
+import CrowdInfo from "@/components/CrowdInfo";
+import TransportInfo from "@/components/TransportInfo";
+import EmergencyInfo from "@/components/EmergencyInfo";
+import AlternatePlanGenerator from "@/components/AlternatePlanGenerator";
 import {
   ArrowLeft,
   Calendar,
@@ -25,6 +29,8 @@ import {
   Camera,
   X,
   Download,
+  Cloud,
+  AlertCircle,
 } from "lucide-react";
 
 type Location = {
@@ -158,6 +164,8 @@ export default function TripDetailsPage() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string>("");
   const [selectedDay, setSelectedDay] = useState<number>(1);
+  const [showAlternate, setShowAlternate] = useState(false);
+  const [alternateMessage, setAlternateMessage] = useState("");
 
   const locations = useMemo(
     () => (trip?.locations ?? []) as Location[],
@@ -311,6 +319,25 @@ export default function TripDetailsPage() {
     a.download = `${trip.destination || "trip"}.pdf`;
     a.click();
     window.URL.revokeObjectURL(url);
+  };
+
+  const generateAlternatePlan = async (scenario: string) => {
+    if (!trip?._id) return;
+
+    try {
+      const res = await api.post("/itinerary/generate-alternate", {
+        tripId: trip._id,
+        scenario,
+      });
+
+      setAlternateMessage(`✓ Alternate plan for "${scenario}" generated successfully!`);
+      setTimeout(() => setAlternateMessage(""), 5000);
+      
+      // Refresh trip data to get the new alternate plan
+      await fetchTrip();
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Failed to generate alternate plan");
+    }
   };
 
   return (
@@ -558,6 +585,123 @@ export default function TripDetailsPage() {
                     )}
                   </div>
                 </div>
+
+                {/* New Features Section */}
+                {!!trip.itinerary && (
+                  <>
+                    {/* Alternate Message */}
+                    {alternateMessage && (
+                      <div className="mb-6 p-4 bg-green-50 border-2 border-green-200 rounded-xl animate-fade-in">
+                        <p className="text-green-800 font-semibold">{alternateMessage}</p>
+                      </div>
+                    )}
+
+                    {/* Alternate Plan Generator */}
+                    <AlternatePlanGenerator
+                      tripId={trip._id}
+                      onGenerate={generateAlternatePlan}
+                    />
+
+                    {/* Crowd & Best Time Info */}
+                    {(trip as any).crowdInfo && (
+                      <CrowdInfo crowdInfo={(trip as any).crowdInfo} />
+                    )}
+
+                    {/* Transport Info */}
+                    {(trip as any).transportInfo || (trip as any).estimatedTransportCost !== undefined && (
+                      <TransportInfo
+                        transportInfo={(trip as any).transportInfo || {
+                          totalDistance: "N/A",
+                          totalCost: (trip as any).estimatedTransportCost?.toString() || "0",
+                          totalTime: 0,
+                          mode: (trip as any).transportMode || "Mixed",
+                        }}
+                        currentMode={(trip as any).transportMode}
+                      />
+                    )}
+
+                    {/* Weather Info */}
+                    {(trip as any).weatherInfo && (
+                      <div className="bg-white rounded-2xl shadow-lg p-6 mt-6">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                          <Cloud className="w-6 h-6 text-blue-600" />
+                          Weather Information
+                        </h3>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div className="p-4 bg-blue-50 rounded-xl">
+                            <p className="text-sm text-gray-600 mb-1">Season</p>
+                            <p className="text-lg font-bold text-blue-900 capitalize">
+                              {(trip as any).weatherInfo.season}
+                            </p>
+                          </div>
+                          <div className="p-4 bg-orange-50 rounded-xl">
+                            <p className="text-sm text-gray-600 mb-1">Temperature</p>
+                            <p className="text-lg font-bold text-orange-900">
+                              {(trip as any).weatherInfo.temp}
+                            </p>
+                          </div>
+                          <div className="p-4 bg-green-50 rounded-xl">
+                            <p className="text-sm text-gray-600 mb-1">Condition</p>
+                            <p className="text-lg font-bold text-green-900">
+                              {(trip as any).weatherInfo.condition}
+                            </p>
+                          </div>
+                          <div className="p-4 bg-purple-50 rounded-xl">
+                            <p className="text-sm text-gray-600 mb-1">Suitability</p>
+                            <p className="text-lg font-bold text-purple-900">
+                              {(trip as any).weatherInfo.suitability}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                          <p className="text-sm text-gray-700">{(trip as any).weatherInfo.forecast}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Emergency & Safety Info */}
+                    {(trip as any).emergencyInfo && (
+                      <EmergencyInfo emergencyInfo={(trip as any).emergencyInfo} />
+                    )}
+
+                    {/* Budget Info */}
+                    {(trip as any).maxBudget && (
+                      <div className="bg-white rounded-2xl shadow-lg p-6 mt-6">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                          <DollarSign className="w-6 h-6 text-green-600" />
+                          Smart Budget Optimization
+                        </h3>
+                        <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded-lg">
+                          <p className="text-sm font-semibold text-green-900 mb-2">
+                            💰 Budget Optimized!
+                          </p>
+                          <p className="text-sm text-green-800">
+                            Your itinerary has been optimized to fit within your maximum budget of ${(trip as any).maxBudget}. 
+                            We've included free attractions and budget-friendly options.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Trip Pace Info */}
+                    {(trip as any).tripPace && (
+                      <div className="bg-white rounded-2xl shadow-lg p-6 mt-6">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Trip Pace</h3>
+                        <div className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border border-orange-200">
+                          <p className="text-lg font-bold text-orange-900 capitalize mb-2">
+                            {(trip as any).tripPace === "relaxed" && "🐢 Relaxed"}
+                            {(trip as any).tripPace === "balanced" && "🚶 Balanced"}
+                            {(trip as any).tripPace === "fast" && "🏃 Fast-Paced"}
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            Your itinerary is designed for a {(trip as any).tripPace} pace with appropriate 
+                            rest time and activity distribution.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
 
                 {/* Map Section */}
                 <div className="space-y-6">
