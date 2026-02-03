@@ -12,7 +12,18 @@ class CrowdService {
    */
   static generateCrowdInfo(locations) {
     return locations.map((location) => {
-      const locationName = location.name || location;
+      const rawName =
+        typeof location === "string"
+          ? location
+          : typeof location?.name === "string"
+            ? location.name
+            : typeof location?.name === "number" || typeof location?.name === "boolean"
+              ? String(location.name)
+              : typeof location === "number" || typeof location === "boolean"
+                ? String(location)
+                : "Unknown Location";
+
+      const locationName = rawName.trim() || "Unknown Location";
       const crowdData = this.getMockCrowdData(locationName);
 
       return {
@@ -26,7 +37,20 @@ class CrowdService {
    * Get mock crowd data based on location type
    */
   static getMockCrowdData(locationName) {
-    const lowerName = locationName.toLowerCase();
+    const safeName =
+      typeof locationName === "string" ? locationName : String(locationName ?? "");
+    const lowerName = safeName.toLowerCase();
+
+    if (!lowerName) {
+      return {
+        bestTime: "Anytime",
+        crowdedHours: "N/A",
+        crowdLevel: CROWD_LEVELS.MODERATE,
+        peakDays: [],
+        weatherSuitability: "All weather",
+        tips: "Plan according to local conditions",
+      };
+    }
 
     // Museums and monuments
     if (

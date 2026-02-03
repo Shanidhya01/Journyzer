@@ -55,7 +55,7 @@ export default function AlternatePlanGenerator({ tripId, onGenerate }: Alternate
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 mt-6">
+    <div className="bg-white rounded-2xl shadow-lg p-6">
       <h3 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
         <RefreshCw className="w-6 h-6 text-indigo-600" />
         Generate Alternate Plan
@@ -80,11 +80,11 @@ export default function AlternatePlanGenerator({ tripId, onGenerate }: Alternate
             >
               {/* Gradient background on hover */}
               <div
-                className={`absolute inset-0 bg-gradient-to-br ${scenario.color} opacity-0 group-hover:opacity-10 transition-opacity`}
+                className={`absolute inset-0 bg-linear-to-br ${scenario.color} opacity-0 group-hover:opacity-10 transition-opacity`}
               />
 
               <div className="relative">
-                <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${scenario.color} mb-3`}>
+                <div className={`inline-flex p-3 rounded-xl bg-linear-to-br ${scenario.color} mb-3`}>
                   {isGenerating ? (
                     <Loader2 className="w-6 h-6 text-white animate-spin" />
                   ) : (

@@ -45,7 +45,12 @@ Return the data strictly in this JSON format:
     {
       "day": 1,
       "title": "Day Title",
-      "activities": ["Activity 1", "Activity 2"]
+      "activities": [
+        {
+          "name": "Activity 1",
+          "ticketPrice": "Free" 
+        }
+      ]
     }
   ]
 }`;
@@ -126,7 +131,12 @@ Return the data strictly in this JSON format:
     {
       "day": 1,
       "title": "Day Title",
-      "activities": ["Activity 1", "Activity 2"],
+      "activities": [
+        {
+          "name": "Activity 1",
+          "ticketPrice": "Free"
+        }
+      ],
       "reason": "Why this day plan works for the scenario"
     }
   ],

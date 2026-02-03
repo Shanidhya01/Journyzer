@@ -34,6 +34,9 @@ export default function Trips() {
   const [error, setError] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [tripIdToDelete, setTripIdToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string>("");
 
   useEffect(() => {
     api.get("/trips")
@@ -57,20 +60,39 @@ export default function Trips() {
     return matchesSearch && matchesFilter;
   });
 
-  const deleteTrip = async (id: string) => {
-    if (confirm("Are you sure you want to delete this trip?")) {
-      try {
-        await api.delete(`/trips/${id}`);
-        setTrips(prev => prev.filter(t => t._id !== id));
-      } catch (err) {
-        console.error(err);
-      }
+  const requestDeleteTrip = (id: string) => {
+    setDeleteError("");
+    setTripIdToDelete(id);
+  };
+
+  const cancelDeleteTrip = () => {
+    if (isDeleting) return;
+    setTripIdToDelete(null);
+    setDeleteError("");
+  };
+
+  const confirmDeleteTrip = async () => {
+    if (!tripIdToDelete || isDeleting) return;
+    setIsDeleting(true);
+    setDeleteError("");
+    try {
+      await api.delete(`/trips/${tripIdToDelete}`);
+      setTrips((prev) => prev.filter((t) => t._id !== tripIdToDelete));
+      setTripIdToDelete(null);
+    } catch (err: any) {
+      console.error(err);
+      setDeleteError(
+        err?.response?.data?.message ||
+          "Failed to delete the trip. Please try again."
+      );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading your trips...</p>
@@ -81,7 +103,7 @@ export default function Trips() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
         <div className="bg-white rounded-2xl shadow-md p-8 max-w-xl w-full">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Failed to load your trips
@@ -98,7 +120,7 @@ export default function Trips() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 py-8">
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -107,7 +129,7 @@ export default function Trips() {
             <p className="text-gray-600">Manage and view all your travel plans</p>
           </div>
           <Link href="/create-itinerary">
-            <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2">
+            <button className="bg-linear-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2">
               <Plus className="w-5 h-5" />
               New Trip
             </button>
@@ -160,7 +182,7 @@ export default function Trips() {
               </p>
               {!searchQuery && (
                 <Link href="/create-itinerary">
-                  <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:shadow-lg transition-all inline-flex items-center gap-2">
+                  <button className="bg-linear-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:shadow-lg transition-all inline-flex items-center gap-2">
                     <Plus className="w-5 h-5" />
                     Create Your First Trip
                   </button>
@@ -184,7 +206,7 @@ export default function Trips() {
                   <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30 pointer-events-none" />
 
                   {/* Bottom fade */}
-                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/90 to-transparent pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-white/90 to-transparent pointer-events-none" />
 
                   {trip.status && (
                     <span className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold ${
@@ -248,7 +270,7 @@ export default function Trips() {
                       </button>
                     </Link>
                     <button
-                      onClick={() => deleteTrip(trip._id)}
+                      onClick={() => requestDeleteTrip(trip._id)}
                       className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       title="Delete trip"
                     >
@@ -258,6 +280,55 @@ export default function Trips() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {tripIdToDelete && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-trip-title"
+          >
+            <div
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={cancelDeleteTrip}
+            />
+            <div className="relative w-full max-w-md rounded-2xl bg-white shadow-xl ring-1 ring-black/5 overflow-hidden">
+              <div className="p-6">
+                <h3 id="delete-trip-title" className="text-xl font-bold text-gray-900">
+                  Delete trip?
+                </h3>
+                <p className="mt-2 text-sm text-gray-600">
+                  This action can’t be undone. Your itinerary and saved details will be removed.
+                </p>
+
+                {deleteError && (
+                  <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {deleteError}
+                  </div>
+                )}
+
+                <div className="mt-6 flex items-center justify-end gap-3">
+                  <button
+                    onClick={cancelDeleteTrip}
+                    disabled={isDeleting}
+                    className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDeleteTrip}
+                    disabled={isDeleting}
+                    className="px-4 py-2 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center gap-2"
+                  >
+                    {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

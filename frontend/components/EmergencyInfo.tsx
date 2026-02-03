@@ -20,7 +20,7 @@ export default function EmergencyInfo({ emergencyInfo }: EmergencyInfoProps) {
   if (!emergencyInfo) return null;
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 mt-6">
+    <div className="bg-white rounded-2xl shadow-lg p-6">
       <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
         <AlertCircle className="w-6 h-6 text-red-600" />
         Emergency & Safety Information
