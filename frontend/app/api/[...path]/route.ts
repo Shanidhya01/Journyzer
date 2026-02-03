@@ -46,7 +46,8 @@ async function proxy(req: Request, ctx: { params: Promise<{ path?: string[] }> }
   headers.delete("host");
   headers.delete("connection");
   headers.delete("content-length");
-  headers.delete("accept-encoding");
+  // Force identity to avoid gzip/br passthrough issues causing ERR_CONTENT_DECODING_FAILED.
+  headers.set("accept-encoding", "identity");
 
   const method = req.method.toUpperCase();
   const hasBody = !["GET", "HEAD"].includes(method);
@@ -65,6 +66,10 @@ async function proxy(req: Request, ctx: { params: Promise<{ path?: string[] }> }
   // Avoid returning hop-by-hop headers.
   resHeaders.delete("transfer-encoding");
   resHeaders.delete("connection");
+  // The upstream response body returned by fetch may already be decoded.
+  // Ensure the browser doesn't try to decode again.
+  resHeaders.delete("content-encoding");
+  resHeaders.delete("content-length");
 
   return new Response(upstream.body, {
     status: upstream.status,
