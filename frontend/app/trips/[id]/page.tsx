@@ -7,7 +7,6 @@ import api from "@/lib/api";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import MapView from "@/components/MapView";
 import WikiImage from "@/components/WikiImage";
-import CrowdInfo from "@/components/CrowdInfo";
 import TransportInfo from "@/components/TransportInfo";
 import EmergencyInfo from "@/components/EmergencyInfo";
 import AlternatePlanGenerator from "@/components/AlternatePlanGenerator";
@@ -31,6 +30,7 @@ import {
   Download,
   Cloud,
   AlertCircle,
+  Users,
 } from "lucide-react";
 
 type Location = {
@@ -301,8 +301,22 @@ export default function TripDetailsPage() {
       "/pdf/trip",
       {
         destination: trip.destination,
+        days: trip.days,
+        budget: trip.budget,
+        interests: trip.interests,
+        createdAt: trip.createdAt,
         itinerary: trip.itinerary,
         locations: trip.locations,
+
+        // Extra sections shown on the page
+        maxBudget: (trip as any).maxBudget,
+        tripPace: (trip as any).tripPace,
+        transportMode: (trip as any).transportMode,
+        estimatedTransportCost: (trip as any).estimatedTransportCost,
+        transportInfo: (trip as any).transportInfo,
+        weatherInfo: (trip as any).weatherInfo,
+        emergencyInfo: (trip as any).emergencyInfo,
+        alternativePlans: (trip as any).alternativePlans,
       },
       {
         responseType: "blob",
@@ -511,6 +525,25 @@ export default function TripDetailsPage() {
               </div>
 
               {/* Content Grid */}
+              {/* Shared Day Tabs */}
+              <div className="mb-6 flex items-center justify-start">
+                <div className="inline-flex flex-wrap gap-2 bg-white/70 backdrop-blur-lg rounded-2xl shadow-lg p-2 border border-white/20">
+                  {dayNumbers.map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => setSelectedDay(d)}
+                      className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold border-2 transition-all ${
+                        selectedDay === d
+                          ? "border-indigo-500 bg-indigo-600 text-white shadow-md"
+                          : "border-gray-200 bg-white/70 text-gray-700 hover:border-indigo-300"
+                      }`}
+                    >
+                      Day {d}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid lg:grid-cols-2 gap-8">
                 {/* Itinerary Section */}
                 <div className="space-y-6">
@@ -525,43 +558,217 @@ export default function TripDetailsPage() {
 
                   <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl p-8 border border-white/20">
                     {isSlotsItinerary(trip.itinerary) ? (
-                      <EnhancedItineraryCard itinerary={trip.itinerary} />
+                      (() => {
+                        const dayItinerary = trip.itinerary.filter(
+                          (d) => d.day === selectedDay
+                        );
+                        if (dayItinerary.length === 0) {
+                          return (
+                            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center">
+                              <p className="text-gray-700 font-semibold">
+                                No itinerary items for Day {selectedDay}.
+                              </p>
+                            </div>
+                          );
+                        }
+                        return <EnhancedItineraryCard itinerary={dayItinerary} />;
+                      })()
                     ) : isActivitiesItinerary(trip.itinerary) ? (
                       <div className="space-y-6">
-                        {trip.itinerary.map((day) => (
-                          <div
-                            key={day.day}
-                            className="border-2 border-indigo-100 rounded-2xl overflow-hidden bg-linear-to-br from-white to-indigo-50/30"
-                          >
-                            <div className="bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 px-6 py-4">
-                              <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                                <Calendar className="w-5 h-5" />
-                                Day {day.day}
-                                {day.title && (
-                                  <span className="text-white/80">
-                                    • {day.title}
-                                  </span>
-                                )}
-                              </h3>
-                            </div>
-                            <div className="p-6">
-                              <ul className="space-y-3">
-                                {day.activities.map((activity, idx) => (
-                                  <li key={idx} className="flex gap-3">
-                                    <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-0.5">
-                                      <span className="text-xs font-bold text-indigo-600">
-                                        {idx + 1}
-                                      </span>
-                                    </div>
-                                    <span className="text-gray-800 leading-relaxed">
-                                      {activity}
+                        {(() => {
+                          const day = trip.itinerary.find(
+                            (d) => d.day === selectedDay
+                          );
+                          if (!day) {
+                            return (
+                              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center">
+                                <p className="text-gray-700 font-semibold">
+                                  No itinerary items for Day {selectedDay}.
+                                </p>
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div className="border-2 border-indigo-100 rounded-2xl overflow-hidden bg-linear-to-br from-white to-indigo-50/30">
+                              <div className="bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 px-6 py-4">
+                                <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                                  <Calendar className="w-5 h-5" />
+                                  Day {day.day}
+                                  {day.title && (
+                                    <span className="text-white/80">
+                                      • {day.title}
                                     </span>
-                                  </li>
-                                ))}
-                              </ul>
+                                  )}
+                                </h3>
+                              </div>
+                              <div className="p-6">
+                                <ul className="space-y-4">
+                                  {day.activities.map((activity, idx) => {
+                                    const activityName =
+                                      typeof activity === "string"
+                                        ? activity
+                                        : (activity as any).name;
+                                    const bestTime =
+                                      typeof activity === "object" &&
+                                      (activity as any).bestTime
+                                        ? (activity as any).bestTime
+                                        : null;
+                                      const ticketPrice =
+                                        typeof activity === "object" &&
+                                        (activity as any).ticketPrice
+                                          ? (activity as any).ticketPrice
+                                          : null;
+                                    const crowdLevel =
+                                      typeof activity === "object" &&
+                                      (activity as any).crowdLevel
+                                        ? (activity as any).crowdLevel
+                                        : null;
+                                    const crowdedHours =
+                                      typeof activity === "object" &&
+                                      (activity as any).crowdedHours
+                                        ? (activity as any).crowdedHours
+                                        : null;
+                                    const weatherSuitability =
+                                      typeof activity === "object" &&
+                                      (activity as any).weatherSuitability
+                                        ? (activity as any).weatherSuitability
+                                        : null;
+                                    const peakDays =
+                                      typeof activity === "object" &&
+                                      (activity as any).peakDays
+                                        ? (activity as any).peakDays
+                                        : null;
+                                    const tips =
+                                      typeof activity === "object" &&
+                                      (activity as any).tips
+                                        ? (activity as any).tips
+                                        : null;
+
+                                    return (
+                                      <li
+                                        key={idx}
+                                        className="border border-gray-200 rounded-xl p-4 hover:border-indigo-300 transition-colors"
+                                      >
+                                        <div className="flex gap-3 mb-3">
+                                          <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-0.5">
+                                            <span className="text-xs font-bold text-indigo-600">
+                                              {idx + 1}
+                                            </span>
+                                          </div>
+                                          <div className="flex-1">
+                                            <span className="text-gray-800 leading-relaxed font-medium">
+                                              {activityName}
+                                            </span>
+                                            {(bestTime || ticketPrice) && (
+                                              <div className="mt-2 flex flex-wrap items-center gap-2">
+                                                {bestTime && (
+                                                  <div className="inline-flex items-center gap-1.5 bg-green-50 px-3 py-1.5 rounded-full border border-green-200">
+                                                    <Clock className="w-4 h-4 text-green-600" />
+                                                    <span className="text-xs text-green-700 font-semibold">
+                                                      {bestTime}
+                                                    </span>
+                                                  </div>
+                                                )}
+                                                {ticketPrice && (
+                                                  <div className="inline-flex items-center gap-1.5 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200">
+                                                    <DollarSign className="w-4 h-4 text-amber-600" />
+                                                    <span className="text-xs text-amber-700 font-semibold">
+                                                      {ticketPrice}
+                                                    </span>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+
+                                        {(crowdedHours ||
+                                          weatherSuitability ||
+                                          crowdLevel) && (
+                                          <div className="ml-9 grid grid-cols-2 gap-3 mb-3">
+                                            {crowdedHours && (
+                                              <div className="flex items-center gap-2">
+                                                <Users className="w-4 h-4 text-red-500" />
+                                                <div>
+                                                  <p className="text-xs font-semibold text-gray-700">
+                                                    Crowded
+                                                  </p>
+                                                  <p className="text-xs text-gray-600">
+                                                    {crowdedHours}
+                                                  </p>
+                                                </div>
+                                              </div>
+                                            )}
+
+                                            {weatherSuitability && (
+                                              <div className="flex items-center gap-2">
+                                                <Cloud className="w-4 h-4 text-blue-500" />
+                                                <div>
+                                                  <p className="text-xs font-semibold text-gray-700">
+                                                    Weather
+                                                  </p>
+                                                  <p className="text-xs text-gray-600">
+                                                    {weatherSuitability}
+                                                  </p>
+                                                </div>
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+
+                                        {(crowdLevel || peakDays) && (
+                                          <div className="ml-9 flex items-center justify-between text-xs">
+                                            {crowdLevel && (
+                                              <div className="flex items-center gap-2">
+                                                <span className="text-base">
+                                                  {crowdLevel.includes("🟢") ||
+                                                  crowdLevel
+                                                    .toLowerCase()
+                                                    .includes("low")
+                                                    ? "🟢"
+                                                    : crowdLevel.includes("🔴") ||
+                                                        crowdLevel
+                                                          .toLowerCase()
+                                                          .includes("high")
+                                                      ? "🔴"
+                                                      : "🟡"}
+                                                </span>
+                                                <span className="font-semibold text-gray-700">
+                                                  {crowdLevel}
+                                                </span>
+                                              </div>
+                                            )}
+
+                                            {peakDays &&
+                                              peakDays.length > 0 && (
+                                                <span className="text-gray-500">
+                                                  Peak: {peakDays
+                                                    .slice(0, 2)
+                                                    .join(", ")}
+                                                </span>
+                                              )}
+                                          </div>
+                                        )}
+
+                                        {tips && (
+                                          <div className="ml-9 mt-3 p-2 bg-blue-50 rounded-lg border border-blue-100">
+                                            <p className="text-xs text-blue-900">
+                                              <span className="font-semibold">
+                                                💡
+                                              </span>{" "}
+                                              {tips}
+                                            </p>
+                                          </div>
+                                        )}
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })()}
                       </div>
                     ) : (
                       <div className="text-center py-12">
@@ -598,23 +805,6 @@ export default function TripDetailsPage() {
                   </div>
 
                   <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl p-6 border border-white/20">
-                    {/* Day Tabs */}
-                    <div className="flex flex-wrap gap-2 mb-5">
-                      {dayNumbers.map((d) => (
-                        <button
-                          key={d}
-                          onClick={() => setSelectedDay(d)}
-                          className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all ${
-                            selectedDay === d
-                              ? "border-indigo-500 bg-indigo-600 text-white shadow-md"
-                              : "border-gray-200 bg-white/70 text-gray-700 hover:border-indigo-300"
-                          }`}
-                        >
-                          Day {d}
-                        </button>
-                      ))}
-                    </div>
-
                     <MapView
                       locations={selectedDayLocations}
                       height={420}
@@ -699,44 +889,47 @@ export default function TripDetailsPage() {
                       )}
                     </div>
                   </div>
+                </div>
 
-                  {/* Additional Features - Below Map */}
-                  <div className="space-y-4">
-                    {/* Alternate Message */}
-                    {alternateMessage && (
-                      <div className="p-4 bg-green-50 border-2 border-green-200 rounded-xl animate-fade-in">
-                        <p className="text-green-800 font-semibold">{alternateMessage}</p>
+                {/* Trip Info Cards (full width, flows into columns) */}
+                <div className="lg:col-span-2 space-y-4">
+                  {alternateMessage && (
+                    <div className="p-4 bg-green-50 border-2 border-green-200 rounded-xl animate-fade-in">
+                      <p className="text-green-800 font-semibold">
+                        {alternateMessage}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="columns-1 md:columns-2 gap-4">
+                    {!!trip.itinerary && (
+                      <div className="break-inside-avoid mb-4">
+                        <AlternatePlanGenerator
+                          tripId={trip._id}
+                          onGenerate={generateAlternatePlan}
+                        />
                       </div>
                     )}
 
-                    {/* Alternate Plan Generator */}
-                    {!!trip.itinerary && (
-                      <AlternatePlanGenerator
-                        tripId={trip._id}
-                        onGenerate={generateAlternatePlan}
-                      />
-                    )}
-
-                      {/* Crowd & Best Time Info */}
-                      {(trip as any).crowdInfo && (
-                        <CrowdInfo crowdInfo={(trip as any).crowdInfo} />
-                      )}
-
-                      {/* Transport Info */}
-                      {((trip as any).transportInfo || (trip as any).estimatedTransportCost !== undefined) && (
+                    {(((trip as any).transportInfo ||
+                      (trip as any).estimatedTransportCost !== undefined) && (
+                      <div className="break-inside-avoid mb-4">
                         <TransportInfo
                           transportInfo={(trip as any).transportInfo || {
                             totalDistance: "N/A",
-                            totalCost: (trip as any).estimatedTransportCost?.toString() || "0",
+                            totalCost:
+                              (trip as any).estimatedTransportCost?.toString() ||
+                              "0",
                             totalTime: 0,
                             mode: (trip as any).transportMode || "Mixed",
                           }}
                           currentMode={(trip as any).transportMode}
                         />
-                      )}
+                      </div>
+                    )) || null}
 
-                      {/* Weather Info */}
-                      {(trip as any).weatherInfo && (
+                    {(trip as any).weatherInfo && (
+                      <div className="break-inside-avoid mb-4">
                         <div className="bg-white rounded-2xl shadow-lg p-5">
                           <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
                             <Cloud className="w-5 h-5 text-blue-600" />
@@ -744,52 +937,67 @@ export default function TripDetailsPage() {
                           </h3>
                           <div className="grid grid-cols-2 gap-3">
                             <div className="p-3 bg-blue-50 rounded-xl">
-                              <p className="text-xs text-gray-600 mb-1">Season</p>
+                              <p className="text-xs text-gray-600 mb-1">
+                                Season
+                              </p>
                               <p className="text-sm font-bold text-blue-900 capitalize">
                                 {(trip as any).weatherInfo.season}
                               </p>
                             </div>
                             <div className="p-3 bg-orange-50 rounded-xl">
-                              <p className="text-xs text-gray-600 mb-1">Temperature</p>
+                              <p className="text-xs text-gray-600 mb-1">
+                                Temperature
+                              </p>
                               <p className="text-sm font-bold text-orange-900">
                                 {(trip as any).weatherInfo.temp}
                               </p>
                             </div>
                           </div>
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      {/* Emergency & Safety Info */}
-                      {(trip as any).emergencyInfo && (
-                        <EmergencyInfo emergencyInfo={(trip as any).emergencyInfo} />
-                      )}
+                    {(trip as any).emergencyInfo && (
+                      <div className="break-inside-avoid mb-4">
+                        <EmergencyInfo
+                          emergencyInfo={(trip as any).emergencyInfo}
+                        />
+                      </div>
+                    )}
 
-                      {/* Budget Info */}
-                      {(trip as any).maxBudget && (
+                    {(trip as any).maxBudget && (
+                      <div className="break-inside-avoid mb-4">
                         <div className="bg-white rounded-2xl shadow-lg p-4">
                           <h3 className="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
                             <DollarSign className="w-4 h-4 text-green-600" />
                             Budget Optimized
                           </h3>
                           <p className="text-xs text-green-800">
-                            Optimized for ${(trip as any).maxBudget} with free & budget-friendly options.
+                            Optimized for ${(trip as any).maxBudget} with free &
+                            budget-friendly options.
                           </p>
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      {/* Trip Pace Info */}
-                      {(trip as any).tripPace && (
+                    {(trip as any).tripPace && (
+                      <div className="break-inside-avoid mb-4">
                         <div className="bg-white rounded-2xl shadow-lg p-4">
                           <h3 className="text-base font-bold text-gray-900 mb-2">
-                            {(trip as any).tripPace === "relaxed" && "🐢 Relaxed Pace"}
-                            {(trip as any).tripPace === "balanced" && "🚶 Balanced Pace"}
-                            {(trip as any).tripPace === "fast" && "🏃 Fast-Paced"}
+                            {(trip as any).tripPace === "relaxed" &&
+                              "🐢 Relaxed Pace"}
+                            {(trip as any).tripPace === "balanced" &&
+                              "🚶 Balanced Pace"}
+                            {(trip as any).tripPace === "fast" &&
+                              "🏃 Fast-Paced"}
                           </h3>
                           <p className="text-xs text-gray-700">
-                            Designed with appropriate rest time and activity distribution.
+                            Designed with appropriate rest time and activity
+                            distribution.
                           </p>
                         </div>
-                      )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

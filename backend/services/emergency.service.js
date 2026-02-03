@@ -10,6 +10,11 @@ class EmergencyService {
    * In production, this would be a comprehensive database
    */
   static getEmergencyInfo(destination) {
+    // Ensure destination is a string
+    if (!destination || typeof destination !== 'string') {
+      destination = 'general';
+    }
+    
     const lowerDest = destination.toLowerCase();
 
     // Comprehensive emergency database

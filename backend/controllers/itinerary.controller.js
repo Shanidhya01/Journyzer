@@ -54,12 +54,26 @@ exports.generate = async (req, res, next) => {
     const dest = destination || country;
 
     for (const day of itinerary) {
+      if (!Array.isArray(day.activities)) continue;
       for (const activity of day.activities) {
-        const loc = await map.getCoordinates(activity, dest);
+        // Extract activity name - always produce a string
+        const rawActivityName =
+          typeof activity === "string"
+            ? activity
+            : typeof activity?.name === "string"
+              ? activity.name
+              : typeof activity?.name === "number" || typeof activity?.name === "boolean"
+                ? String(activity.name)
+                : typeof activity === "number" || typeof activity === "boolean"
+                  ? String(activity)
+                  : "Unknown Location";
+
+        const activityName = rawActivityName.trim() || "Unknown Location";
+        const loc = await map.getCoordinates(activityName, dest);
 
         if (loc) {
           locations.push({
-            name: activity,
+            name: activityName,
             ...loc,
             day: day.day,
           });
@@ -72,6 +86,46 @@ exports.generate = async (req, res, next) => {
 
     // Generate crowd and best time information
     const crowdInfo = CrowdService.generateCrowdInfo(locations);
+
+    // Create a map of location names to their crowd info
+    const crowdInfoMap = {};
+    crowdInfo.forEach(info => {
+      crowdInfoMap[info.location] = info;
+    });
+
+    // Embed crowd info into itinerary activities
+    const enrichedItinerary = itinerary.map(day => ({
+      ...day,
+      activities: (Array.isArray(day.activities) ? day.activities : []).map(activity => {
+        const rawActivityName =
+          typeof activity === "string"
+            ? activity
+            : typeof activity?.name === "string"
+              ? activity.name
+              : typeof activity?.name === "number" || typeof activity?.name === "boolean"
+                ? String(activity.name)
+                : typeof activity === "number" || typeof activity === "boolean"
+                  ? String(activity)
+                  : "Unknown Location";
+
+        const activityName = rawActivityName.trim() || "Unknown Location";
+        const activityCrowdInfo = crowdInfoMap[activityName];
+        if (activityCrowdInfo) {
+          return {
+            ...(activity && typeof activity === "object" ? activity : {}),
+            name: activityName,
+            bestTime: activityCrowdInfo.bestTime,
+            crowdedHours: activityCrowdInfo.crowdedHours,
+            crowdLevel: activityCrowdInfo.crowdLevel,
+            weatherSuitability: activityCrowdInfo.weatherSuitability,
+            peakDays: activityCrowdInfo.peakDays,
+            tips: activityCrowdInfo.tips,
+          };
+        }
+        if (activity && typeof activity === "object") return { ...activity, name: activityName };
+        return { name: activityName };
+      })
+    }));
 
     // Get weather information
     const weatherInfo = await CrowdService.getWeatherInfo(dest, days);
@@ -95,7 +149,7 @@ exports.generate = async (req, res, next) => {
       maxBudget,
       tripPace,
       transportMode,
-      itinerary,
+      itinerary: enrichedItinerary,
       locations,
       totalCost: budgetInfo ? budgetInfo.totalCost : costBreakdown.total,
       estimatedTransportCost: parseFloat(transportInfo.totalCost),
@@ -121,7 +175,7 @@ exports.generate = async (req, res, next) => {
 
       return res.status(200).json({
         trip,
-        itinerary,
+        itinerary: enrichedItinerary,
         locations,
         budgetInfo,
         transportInfo,
@@ -136,7 +190,7 @@ exports.generate = async (req, res, next) => {
     
     return res.status(201).json({
       trip,
-      itinerary,
+      itinerary: enrichedItinerary,
       locations,
       budgetInfo,
       transportInfo,
@@ -181,11 +235,24 @@ exports.generateAlternate = async (req, res, next) => {
     // Get coordinates for alternate locations
     const alternateLocations = [];
     for (const day of alternateItinerary) {
+      if (!Array.isArray(day.activities)) continue;
       for (const activity of day.activities) {
-        const loc = await map.getCoordinates(activity, trip.destination);
+        const rawActivityName =
+          typeof activity === "string"
+            ? activity
+            : typeof activity?.name === "string"
+              ? activity.name
+              : typeof activity?.name === "number" || typeof activity?.name === "boolean"
+                ? String(activity.name)
+                : typeof activity === "number" || typeof activity === "boolean"
+                  ? String(activity)
+                  : "Unknown Location";
+
+        const activityName = rawActivityName.trim() || "Unknown Location";
+        const loc = await map.getCoordinates(activityName, trip.destination);
         if (loc) {
           alternateLocations.push({
-            name: activity,
+            name: activityName,
             ...loc,
             day: day.day,
           });

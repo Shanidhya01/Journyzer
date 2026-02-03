@@ -35,7 +35,7 @@ export default function TransportInfo({ transportInfo, currentMode }: TransportI
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 mt-6">
+    <div className="bg-white rounded-2xl shadow-lg p-6">
       <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
         {getModeIcon(transportInfo.mode)}
         Transport Information
@@ -43,12 +43,12 @@ export default function TransportInfo({ transportInfo, currentMode }: TransportI
 
       {/* Summary */}
       <div className="grid md:grid-cols-3 gap-4 mb-6">
-        <div className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200">
+        <div className="p-4 bg-linear-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200">
           <p className="text-sm text-gray-600 mb-1">Total Distance</p>
           <p className="text-2xl font-bold text-indigo-600">{transportInfo.totalDistance} km</p>
         </div>
 
-        <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
+        <div className="p-4 bg-linear-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
           <div className="flex items-center gap-2 mb-1">
             <DollarSign className="w-4 h-4 text-gray-600" />
             <p className="text-sm text-gray-600">Total Cost</p>
@@ -56,7 +56,7 @@ export default function TransportInfo({ transportInfo, currentMode }: TransportI
           <p className="text-2xl font-bold text-green-600">${transportInfo.totalCost}</p>
         </div>
 
-        <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-200">
+        <div className="p-4 bg-linear-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-200">
           <div className="flex items-center gap-2 mb-1">
             <Clock className="w-4 h-4 text-gray-600" />
             <p className="text-sm text-gray-600">Total Time</p>
