@@ -28,6 +28,9 @@ export default function CreateItineraryClient() {
   const [destination, setDestination] = useState("");
   const [days, setDays] = useState(3);
   const [budget, setBudget] = useState("Medium");
+  const [maxBudget, setMaxBudget] = useState<number | undefined>(undefined);
+  const [tripPace, setTripPace] = useState("balanced");
+  const [transportMode, setTransportMode] = useState("mixed");
   const [interests, setInterests] = useState<string[]>([]);
   const [customInterest, setCustomInterest] = useState("");
   const [data, setData] = useState<any>(null);
@@ -51,6 +54,19 @@ export default function CreateItineraryClient() {
     { value: "Low", label: "Budget", description: "$ - Affordable options", emoji: "💰" },
     { value: "Medium", label: "Moderate", description: "$$ - Balanced experience", emoji: "💳" },
     { value: "High", label: "Luxury", description: "$$$ - Premium choices", emoji: "💎" },
+  ];
+
+  const paceOptions = [
+    { value: "relaxed", emoji: "🐢", label: "Relaxed", description: "3 spots/day, plenty of rest" },
+    { value: "balanced", emoji: "🚶", label: "Balanced", description: "5 spots/day, moderate pace" },
+    { value: "fast", emoji: "🏃", label: "Fast-Paced", description: "7 spots/day, action-packed" },
+  ];
+
+  const transportOptions = [
+    { value: "public", emoji: "🚌", label: "Public Transport", cost: "Low" },
+    { value: "cab", emoji: "🚕", label: "Cab/Taxi", cost: "High" },
+    { value: "walking", emoji: "🚶", label: "Walking", cost: "Free" },
+    { value: "mixed", emoji: "🔀", label: "Mixed", cost: "Medium" },
   ];
 
   useEffect(() => {
@@ -114,6 +130,9 @@ export default function CreateItineraryClient() {
         destination: destination.trim(),
         days,
         budget,
+        maxBudget,
+        tripPace,
+        transportMode,
         interests,
       });
 
@@ -232,6 +251,91 @@ export default function CreateItineraryClient() {
                       <div className="text-3xl mb-2">{option.emoji}</div>
                       <div className="font-bold text-gray-900 mb-1 text-lg">{option.label}</div>
                       <div className="text-sm text-gray-600">{option.description}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Max Budget (Optional) */}
+              <div className="group">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-800 mb-4">
+                  <div className="p-2 bg-emerald-100 rounded-lg group-hover:bg-emerald-200 transition-colors">
+                    <DollarSign className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  Set Maximum Budget (Optional)
+                  {maxBudget && (
+                    <span className="ml-auto text-lg font-bold text-emerald-600">
+                      ${maxBudget}
+                    </span>
+                  )}
+                </label>
+                <p className="text-sm text-gray-600 mb-3">
+                  Set a maximum budget and we'll optimize your itinerary with free attractions and cost-effective options
+                </p>
+                <input
+                  type="number"
+                  value={maxBudget || ""}
+                  onChange={(e) => setMaxBudget(e.target.value ? Number(e.target.value) : undefined)}
+                  placeholder="e.g., 1500"
+                  min="0"
+                  className="w-full px-6 py-4 border border-gray-200 rounded-2xl bg-white/90 backdrop-blur-sm text-lg placeholder:text-gray-400 transition-all duration-200 focus:ring-2 focus:ring-emerald-400/40 focus:scale-[1.01] focus:border-emerald-400 outline-none"
+                />
+              </div>
+
+              {/* Trip Pace */}
+              <div className="group">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-800 mb-4">
+                  <div className="p-2 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
+                    <span className="text-xl">⚡</span>
+                  </div>
+                  Trip Pace
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {paceOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setTripPace(option.value)}
+                      className={`relative p-5 rounded-2xl border-2 transition-all duration-300 ${
+                        tripPace === option.value
+                          ? "border-orange-500 bg-linear-to-br from-orange-50 to-amber-50 shadow-lg scale-105"
+                          : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-md"
+                      }`}
+                    >
+                      {tripPace === option.value && (
+                        <div className="absolute -top-2 -right-2 bg-orange-600 text-white rounded-full p-1">
+                          <CheckCircle2 className="w-5 h-5" />
+                        </div>
+                      )}
+                      <div className="text-3xl mb-2">{option.emoji}</div>
+                      <div className="font-bold text-gray-900 mb-1">{option.label}</div>
+                      <div className="text-xs text-gray-600">{option.description}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Transport Mode */}
+              <div className="group">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-800 mb-4">
+                  <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                    <span className="text-xl">🚗</span>
+                  </div>
+                  Preferred Transport Mode
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {transportOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setTransportMode(option.value)}
+                      className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                        transportMode === option.value
+                          ? "border-blue-500 bg-blue-500 text-white shadow-md scale-105"
+                          : "border-gray-200 text-gray-700 bg-white hover:border-blue-300 hover:shadow-sm"
+                      }`}
+                    >
+                      <div className="text-2xl mb-1">{option.emoji}</div>
+                      <div className="text-xs font-semibold">{option.label}</div>
+                      <div className="text-xs opacity-75">Cost: {option.cost}</div>
                     </button>
                   ))}
                 </div>
